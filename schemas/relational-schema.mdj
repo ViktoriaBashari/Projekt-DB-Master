@@ -3941,23 +3941,6 @@
 											"top": 1040,
 											"width": 247.5126953125,
 											"height": 13
-										},
-										{
-											"_type": "ERDColumnView",
-											"_id": "AAAAAAGUc8Bbrzxzfz8=",
-											"_parent": {
-												"$ref": "AAAAAAGUc8BbrzxrlcM="
-											},
-											"model": {
-												"$ref": "AAAAAAGUc8BbtT7Fk3k="
-											},
-											"visible": false,
-											"font": "Arial;13;0",
-											"parentStyle": true,
-											"left": 1885,
-											"top": -210,
-											"width": 247.5126953125,
-											"height": 13
 										}
 									],
 									"font": "Arial;13;0",
@@ -7803,14 +7786,6 @@
 							"length": 0,
 							"foreignKey": true,
 							"nullable": true
-						},
-						{
-							"_type": "ERDColumn",
-							"_id": "AAAAAAGUc8BbtT7Fk3k=",
-							"_parent": {
-								"$ref": "AAAAAAGUc8BbtT697DM="
-							},
-							"name": "Column1"
 						}
 					]
 				},
@@ -7928,6 +7903,18 @@
 					]
 				}
 			]
+		}
+	],
+	"tags": [
+		{
+			"_type": "Tag",
+			"_id": "AAAAAAGUg+SDC3z+Tzw=",
+			"_parent": {
+				"$ref": "AAAAAAFF+h6SjaM2Hec="
+			},
+			"name": "database",
+			"kind": "string",
+			"value": "untitled"
 		}
 	]
 }
