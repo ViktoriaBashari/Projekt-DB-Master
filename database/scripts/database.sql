@@ -26,7 +26,7 @@ CREATE TABLE Pacient (
     DataRegjistrimit DATE NOT NULL,
     Profesioni NVARCHAR,
     Vendbanimi NVARCHAR,
-    Grupigjakut CHAR(3),
+    GrupiGjakut CHAR(3),
     PRIMARY KEY (personid)
 );
 
@@ -53,11 +53,11 @@ CREATE INDEX ON staf
 CREATE TABLE Person (
     Id INTEGER NOT NULL,
     Emri NVARCHAR NOT NULL,
-    mbiemri NVARCHAR NOT NULL,
-    datelindja DATE NOT NULL,
-    nrtelefoni NUMERTELEFONI NOT NULL,
-    gjiniaid TINYINT NOT NULL,
-    datakrijimit DATETIME NOT NULL,
+    Mbiemri NVARCHAR NOT NULL,
+    Datelindja DATE NOT NULL,
+    NrTelefoni NUMERTELEFONI NOT NULL,
+    GjiniaId TINYINT NOT NULL,
+    DataKrijimit DATETIME NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -65,25 +65,25 @@ CREATE INDEX ON person
     (gjiniaid);
 
 
-CREATE TABLE takim (
-    id INTEGER NOT NULL,
-    datakrijimit DATETIME NOT NULL,
-    datatakimit DATETIME NOT NULL,
-    doktorid INTEGER NOT NULL,
-    infermierid INTEGER,
-    pacientid INTEGER NOT NULL,
-    recepsionistiid INTEGER NOT NULL,
-    procedureid CHAR(5) NOT NULL,
-    shqetesimikryesor NVARCHAR,
-    kohezgjatjashqetesimit NVARCHAR,
-    simptomatelidhura NVARCHAR,
-    konkluzioni NVARCHAR,
-    eshteanulluar boolean NOT NULL,
-    column1  NOT NULL,
+CREATE TABLE Takim (
+    Id INTEGER NOT NULL,
+    DataKrijimit DATETIME NOT NULL,
+    DataTakimit DATETIME NOT NULL,
+    DoktorId INTEGER NOT NULL,
+    InfermierId INTEGER,
+    PacientId INTEGER NOT NULL,
+    RecepsionistiId INTEGER NOT NULL,
+    ProcedureId CHAR(5) NOT NULL,
+    ShqetesimiKryesor NVARCHAR,
+    KohezgjatjaShqetesimit NVARCHAR,
+    SimptomaTeLidhura NVARCHAR,
+    Konkluzioni NVARCHAR,
+    EshteAnulluar boolean NOT NULL,
+    Column1  NOT NULL,
     PRIMARY KEY (id)
 );
 
-ALTER TABLE takim
+ALTER TABLE Takim
     ADD UNIQUE (datatakimit, doktorid);
 
 CREATE INDEX ON takim
@@ -96,63 +96,63 @@ CREATE INDEX ON takim
     (procedureid);
 
 
-CREATE TABLE turnorari (
-    id INTEGER NOT NULL,
-    emri NVARCHAR NOT NULL,
-    orafilluese time without time zone NOT NULL,
-    oraperfundimtare time without time zone NOT NULL,
+CREATE TABLE TurnOrari (
+    Id INTEGER NOT NULL,
+    Emri NVARCHAR NOT NULL,
+    OraFilluese time without time zone NOT NULL,
+    OraPerfundimtare time without time zone NOT NULL,
     PRIMARY KEY (id)
 );
 
 
-CREATE TABLE diteturni (
-    turnorarid INTEGER NOT NULL,
-    ditejaveid TINYINT NOT NULL,
+CREATE TABLE DiteTurni (
+    TurnOrarId INTEGER NOT NULL,
+    DiteJaveId TINYINT NOT NULL,
     PRIMARY KEY (turnorarid, ditejaveid)
 );
 
 
-CREATE TABLE orar (
-    turnorarid INTEGER NOT NULL,
-    stafid INTEGER NOT NULL,
+CREATE TABLE Orar (
+    TurnOrarId INTEGER NOT NULL,
+    StafId INTEGER NOT NULL,
     PRIMARY KEY (turnorarid, stafid)
 );
 
 
-CREATE TABLE departament (
-    id INTEGER NOT NULL,
-    drejtuesid INTEGER NOT NULL,
-    emri NVARCHAR NOT NULL,
+CREATE TABLE Departament (
+    Id INTEGER NOT NULL,
+    DrejtuesId INTEGER NOT NULL,
+    Emri NVARCHAR NOT NULL,
     PRIMARY KEY (id)
 );
 
-ALTER TABLE departament
+ALTER TABLE Departament
     ADD UNIQUE (emri);
 
-CREATE INDEX ON departament
+CREATE INDEX ON Departament
     (drejtuesid);
 
 
-CREATE TABLE anamnezafiziologjike (
-    id INTEGER NOT NULL,
-    pacientid INTEGER NOT NULL,
-    stafipergjigjesid INTEGER NOT NULL,
-    datakrijimit DATETIME NOT NULL,
-    sistemifrymemarrjes NVARCHAR,
-    sistemigjenitourinar NVARCHAR,
-    sistemitretes NVARCHAR,
-    sistemiokular NVARCHAR,
-    sistemineurologjik NVARCHAR,
-    sistemiorl NVARCHAR,
-    sistemipsikiatrik NVARCHAR,
-    sistemikardiovaskular NVARCHAR NOT NULL,
+CREATE TABLE AnamnezaFiziologjike (
+    Id INTEGER NOT NULL,
+    PacientId INTEGER NOT NULL,
+    StafiPergjigjesId INTEGER NOT NULL,
+    DataKrijimit DATETIME NOT NULL,
+    SistemiFrymemarrjes NVARCHAR,
+    SistemiGjenitourinar NVARCHAR,
+    SistemiTretes NVARCHAR,
+    SistemiOkular NVARCHAR,
+    SistemiNeurologjik NVARCHAR,
+    SistemiOrl NVARCHAR,
+    SistemiPsikiatrik NVARCHAR,
+    SistemiKardiovaskular NVARCHAR NOT NULL,
     PRIMARY KEY (id)
 );
 
-CREATE INDEX ON anamnezafiziologjike
-    (pacientid);
-CREATE INDEX ON anamnezafiziologjike
-    (stafipergjigjesid);
+CREATE INDEX ON AnamnezaFiziologjike
+    (PacientId);
+CREATE INDEX ON AnamnezaFiziologjike
+    (StafiPergjigjesId);
 
 
 CREATE TABLE anamnezafamiljare (
