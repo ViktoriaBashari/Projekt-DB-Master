@@ -20,8 +20,8 @@ CREATE TABLE MetodePagimi (
 );
 
 
-CREATE TABLE pacient (
-    personid INTEGER NOT NULL,
+CREATE TABLE Pacient (
+    Personid INTEGER NOT NULL,
     nid CHAR(10) NOT NULL,
     dataregjistrimit DATE NOT NULL,
     profesioni NVARCHAR,
