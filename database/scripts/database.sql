@@ -21,25 +21,16 @@ CREATE TABLE MetodePagimi (
 
 
 CREATE TABLE Pacient (
-<<<<<<< HEAD
     PersonId INTEGER NOT NULL,
     Nid CHAR(10) NOT NULL,
     DataRegjistrimit DATE NOT NULL,
     Profesioni NVARCHAR,
     Vendbanimi NVARCHAR,
     Grupigjakut CHAR(3),
-=======
-    Personid INTEGER NOT NULL,
-    nid CHAR(10) NOT NULL,
-    dataregjistrimit DATE NOT NULL,
-    profesioni NVARCHAR,
-    vendbanimi NVARCHAR,
-    grupigjakut CHAR(3),
->>>>>>> 026d64d29f438950074c9f5cbe1d74a1e1e62bf6
     PRIMARY KEY (personid)
 );
 
-ALTER TABLE pacient
+ALTER TABLE Pacient
     ADD UNIQUE (nid);
 
 
@@ -59,9 +50,9 @@ CREATE INDEX ON staf
     (rolid);
 
 
-CREATE TABLE person (
-    id INTEGER NOT NULL,
-    emri NVARCHAR NOT NULL,
+CREATE TABLE Person (
+    Id INTEGER NOT NULL,
+    Emri NVARCHAR NOT NULL,
     mbiemri NVARCHAR NOT NULL,
     datelindja DATE NOT NULL,
     nrtelefoni NUMERTELEFONI NOT NULL,
