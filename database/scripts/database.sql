@@ -20,13 +20,13 @@ CREATE TABLE MetodePagimi (
 );
 
 
-CREATE TABLE pacient (
-    personid INTEGER NOT NULL,
-    nid CHAR(10) NOT NULL,
-    dataregjistrimit DATE NOT NULL,
-    profesioni NVARCHAR,
-    vendbanimi NVARCHAR,
-    grupigjakut CHAR(3),
+CREATE TABLE Pacient (
+    PersonId INTEGER NOT NULL,
+    Nid CHAR(10) NOT NULL,
+    DataRegjistrimit DATE NOT NULL,
+    Profesioni NVARCHAR,
+    Vendbanimi NVARCHAR,
+    Grupigjakut CHAR(3),
     PRIMARY KEY (personid)
 );
 
@@ -35,12 +35,12 @@ ALTER TABLE pacient
 
 
 CREATE TABLE staf (
-    personid INTEGER NOT NULL,
-    departamentid INTEGER NOT NULL,
-    rolid TINYINT NOT NULL,
-    datapunesimit DATE NOT NULL,
-    rroga NUMERIC(15,4) NOT NULL,
-    specialiteti NVARCHAR,
+    PersonId INTEGER NOT NULL,
+    Departamentid INTEGER NOT NULL,
+    RolId TINYINT NOT NULL,
+    DataPunesimit DATE NOT NULL,
+    Rroga NUMERIC(15,4) NOT NULL,
+    Specialiteti NVARCHAR,
     PRIMARY KEY (personid)
 );
 
