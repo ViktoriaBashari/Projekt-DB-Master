@@ -6,7 +6,7 @@ GO
 -- User-defined data type
 
 CREATE TYPE NumerTelefoni
-	FROM CHAR(18);
+	FROM CHAR(18) NULL;
 
 GO
 
@@ -92,8 +92,8 @@ GO
 CREATE TABLE Pacient (
     PersonId INT NOT NULL FOREIGN KEY REFERENCES Person(Id),
     NID CHAR(10) NOT NULL,
-    DataRegjistrimit DATE NOT NULL,
-    GrupiGjakut CHAR(3),
+    DataRegjistrimit DATE NOT NULL DEFAULT GETDATE(),
+    GrupiGjakut CHAR(3) NULL,
 
 	PRIMARY KEY (PersonId),
 	CONSTRAINT NIDUnik UNIQUE(NID),
@@ -106,7 +106,7 @@ CREATE TABLE Adrese (
     PacientId INT NOT NULL FOREIGN KEY REFERENCES Pacient(PersonId),
     Rruga VARCHAR(50) NOT NULL,
     Qyteti VARCHAR(20) NOT NULL,
-    InformacionShtese VARCHAR(100),
+    InformacionShtese VARCHAR(100) NULL,
 
     PRIMARY KEY (PacientId)
 );
@@ -118,7 +118,7 @@ CREATE TABLE Staf (
     RolId TINYINT NOT NULL FOREIGN KEY REFERENCES RolStafi(Id),
     DataPunesimit DATE NOT NULL,
     Rroga DECIMAL(15,4) NOT NULL,
-    Specialiteti VARCHAR(50),
+    Specialiteti VARCHAR(50) NULL,
 
 	PRIMARY KEY (PersonId),
 	CONSTRAINT PunonjesIdUnik UNIQUE(PunonjesId),
@@ -137,16 +137,16 @@ GO
 
 CREATE TABLE Takim (
     Id INT NOT NULL IDENTITY PRIMARY KEY,
-    DataKrijimit DATETIME NOT NULL,
-    DataTakimit DATETIME NOT NULL,
+    DataKrijimit DATETIME NOT NULL DEFAULT GETDATE(),
+    DataTakimit DATETIME NOT NULL CHECK (CAST(DataTakimit AS DATE) >= CAST(GETDATE() AS DATE)),
     DoktorId INT NOT NULL FOREIGN KEY REFERENCES Staf(PersonId),
-    InfermierId INT FOREIGN KEY REFERENCES Staf(PersonId),
+    InfermierId INT  NULL FOREIGN KEY REFERENCES Staf(PersonId),
     PacientId INT NOT NULL FOREIGN KEY REFERENCES Pacient(PersonId),
     SherbimId CHAR(5) NOT NULL FOREIGN KEY REFERENCES Sherbim(Kodi),
-    ShqetesimiKryesor VARCHAR(MAX),
-    KohezgjatjaShqetesimit VARCHAR(100),
-    SimptomaTeLidhura VARCHAR(MAX),
-    Konkluzioni VARCHAR(MAX),
+    ShqetesimiKryesor VARCHAR(MAX) NULL,
+    KohezgjatjaShqetesimit VARCHAR(100) NULL,
+    SimptomaTeLidhura VARCHAR(MAX) NULL,
+    Konkluzioni VARCHAR(MAX) NULL,
     EshteAnulluar BIT NOT NULL DEFAULT 0,
 
 	CONSTRAINT OrarStafiUnik UNIQUE(DataTakimit, DoktorId),
@@ -160,11 +160,12 @@ CREATE INDEX SherbimTakimi ON Takim (SherbimId);
 GO
 
 CREATE TABLE Fature (
-    Id INT NOT NULL IDENTITY PRIMARY KEY,
     TakimId INT NOT NULL FOREIGN KEY REFERENCES Takim(Id),
     Cmimi DECIMAL(20,5) NOT NULL,
-    DataPagimit DATETIME,
+    DataPagimit DATETIME NULL,
     MetodaPagimitId TINYINT FOREIGN KEY REFERENCES MetodePagimi(Id),
+
+	PRIMARY KEY (TakimId),
 );
 
 CREATE INDEX TakimFature ON Fature (TakimId);
@@ -211,15 +212,15 @@ CREATE TABLE AnamnezaFiziologjike (
     Id INT NOT NULL IDENTITY PRIMARY KEY,
     PacientId INT NOT NULL FOREIGN KEY REFERENCES Pacient(PersonId),
     StafiPergjegjesId INT NOT NULL FOREIGN KEY REFERENCES Staf(PersonId),
-    DataKrijimit DATETIME NOT NULL,
-    SistemiFrymemarrjes VARCHAR(MAX),
-    SistemiGjenitourinar VARCHAR(MAX),
-    SistemiTretes VARCHAR(MAX),
-    SistemiOkular VARCHAR(MAX),
-    SistemiNeurologjik VARCHAR(MAX),
-    SistemiOrl VARCHAR(MAX),
-    SistemiPsikiatrik VARCHAR(MAX),
-    SistemiKardiovaskular VARCHAR(MAX),
+    DataKrijimit DATETIME NOT NULL DEFAULT GETDATE(),
+    SistemiFrymemarrjes VARCHAR(MAX) NULL,
+    SistemiGjenitourinar VARCHAR(MAX) NULL,
+    SistemiTretes VARCHAR(MAX) NULL,
+    SistemiOkular VARCHAR(MAX) NULL,
+    SistemiNeurologjik VARCHAR(MAX) NULL,
+    SistemiOrl VARCHAR(MAX) NULL,
+    SistemiPsikiatrik VARCHAR(MAX) NULL,
+    SistemiKardiovaskular VARCHAR(MAX) NULL,
 );
 
 CREATE INDEX AnamnezaPacientit ON AnamnezaFiziologjike (PacientId);
@@ -232,9 +233,9 @@ CREATE TABLE AnamnezaFamiljare (
     LidhjaFamiljare VARCHAR(50) NOT NULL,
     Datelindja DATE NOT NULL,
     Semundja VARCHAR(50) NOT NULL,
-    MoshaDiagnozes TINYINT,
-    ShkakuVdekjes VARCHAR(80),
-    DataVdekjes DATE,
+    MoshaDiagnozes TINYINT NULL,
+    ShkakuVdekjes VARCHAR(80) NULL,
+    DataVdekjes DATE NULL,
 );
 
 CREATE INDEX AnamnezaPacientit ON AnamnezaFamiljare (PacientId);
@@ -257,9 +258,9 @@ CREATE TABLE AnamnezaAbuzimit (
     PacientId INT NOT NULL FOREIGN KEY REFERENCES Pacient(PersonId),
     StafiPergjegjesId INT NOT NULL FOREIGN KEY REFERENCES Staf(PersonId),
     Substanca VARCHAR(50) NOT NULL,
-    Pershkrimi VARCHAR(MAX),
+    Pershkrimi VARCHAR(MAX) NULL,
     DataFillimit DATE NOT NULL,
-    DataPerfundimit DATE,
+    DataPerfundimit DATE NULL,
 );
 
 CREATE INDEX AnamnezaPacientit ON AnamnezaAbuzimit (PacientId);
@@ -273,7 +274,7 @@ CREATE TABLE AnamnezaFarmakologjike (
     Doza VARCHAR(40) NOT NULL,
     Arsyeja VARCHAR(200) NOT NULL,
     DataFillimit DATE NOT NULL,
-    DataPerfundimit DATE,
+    DataPerfundimit DATE NULL,
     MarrePaRecete BIT NOT NULL,
 );
 
