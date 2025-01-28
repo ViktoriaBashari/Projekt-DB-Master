@@ -78,8 +78,8 @@ CREATE TABLE Sherbim (
 
 CREATE TABLE Person (
     Id INT NOT NULL IDENTITY PRIMARY KEY,
-    Emri VARCHAR NOT NULL,
-    Mbiemri VARCHAR NOT NULL,
+    Emri VARCHAR(30) NOT NULL,
+    Mbiemri VARCHAR(30) NOT NULL,
     Datelindja DATE NOT NULL,
     NrTelefoni NumerTelefoni NOT NULL,
     GjiniaId TINYINT NOT NULL FOREIGN KEY REFERENCES Gjinia(Id),

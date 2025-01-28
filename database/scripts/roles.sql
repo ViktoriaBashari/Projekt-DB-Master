@@ -12,6 +12,7 @@ GO
 
 -- Leje
 
+
 GRANT SELECT, INSERT, UPDATE, DELETE ON MetodePagimi TO Administrator, Recepsionist, Pacient, Doktor, Infermier;
 GRANT SELECT, INSERT, UPDATE, DELETE ON Gjinia TO Administrator, Recepsionist, Pacient, Doktor, Infermier;
 GRANT SELECT, INSERT, UPDATE, DELETE ON RolStafi TO Administrator, Recepsionist, Pacient, Doktor, Infermier;

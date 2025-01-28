@@ -275,3 +275,33 @@ AS RETURN
 	GROUP BY person.Id, person.Emri, person.Mbiemri;
 
 GO
+
+CREATE OR ALTER FUNCTION VerifikoFjalekaliminPerdoruesit(@Username VARCHAR(MAX), @Fjalekalimi VARCHAR(MAX))
+RETURNS BIT
+AS BEGIN
+	RETURN IIF(
+		EXISTS(SELECT *
+			FROM sys.sql_logins AS logins
+			WHERE logins.name = @Username AND PWDCOMPARE(@Fjalekalimi, logins.password_hash) = 1),
+		1, 0);
+END;
+
+GO
+
+CREATE OR ALTER FUNCTION MerrRolinPerdoruesit(@Username VARCHAR(MAX))
+RETURNS VARCHAR
+AS BEGIN
+	DECLARE @roli VARCHAR;
+
+	SELECT @roli = r.name
+	FROM sys.database_role_members rm
+	JOIN sys.database_principals r 
+       ON rm.role_principal_id = r.principal_id
+	  JOIN sys.database_principals m 
+		   ON rm.member_principal_id = m.principal_id
+	 WHERE r.type = 'R' AND m.name = @Username;
+
+	 RETURN @roli;
+END;
+
+GO
