@@ -103,7 +103,7 @@ GO
 
 CREATE OR ALTER FUNCTION GjeneroFluksinRegjistrimeveTePacienteve
 (
-	@VitiFillimtar INT,
+	@VitiFillimtar INT = NULL,
 	@VitiPerfundimtar INT = NULL,
 	@DistributimMujor BIT -- Shto ndarje mujore ne raport
 )
@@ -115,7 +115,7 @@ AS RETURN
 		COUNT(PersonId) AS NrPacienteve
 	FROM Pacient
 	WHERE 
-		DATEPART(YEAR, DataRegjistrimit) >= @VitiFillimtar AND
+		(@VitiFillimtar IS NULL OR DATEPART(YEAR, DataRegjistrimit) >= @VitiFillimtar) AND
 		(@VitiPerfundimtar IS NULL OR DATEPART(YEAR, DataRegjistrimit) <= @VitiPerfundimtar)
 	GROUP BY 
 		DATEPART(YEAR, DataRegjistrimit), 
@@ -141,8 +141,9 @@ GO
 
 CREATE OR ALTER FUNCTION GjeneroRaportFitimesh
 (
-	@DistributimMujor BIT, -- Shto ndarje mujore ne raport
-	@VitiPerkates INT = NULL
+	@VitiFillimtar INT = NULL,
+	@VitiPerfundimtar INT = NULL,
+	@DistributimMujor BIT -- Shto ndarje mujore ne raport
 )
 RETURNS TABLE
 AS RETURN
@@ -153,7 +154,8 @@ AS RETURN
 	FROM Fature
 	WHERE 
 		DataPagimit IS NOT NULL AND
-		(@VitiPerkates IS NULL OR DATEPART(YEAR, DataPagimit) = @VitiPerkates)
+		(@VitiFillimtar IS NULL OR DATEPART(YEAR, DataPagimit) >= @VitiFillimtar) AND
+		(@VitiPerfundimtar IS NULL OR DATEPART(YEAR, DataPagimit) <= @VitiPerfundimtar)
 	GROUP BY 
 		DATEPART(YEAR, DataPagimit),
 		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, DataPagimit) END;
@@ -168,7 +170,7 @@ AS BEGIN
 		@shpenzimet DECIMAL = dbo.GjeneroShpenzimetVjetore(@VitiPerkates);
 
 	SELECT @fitimet = FitimeFature
-	FROM GjeneroRaportFitimesh(0, @VitiPerkates);
+	FROM GjeneroRaportFitimesh(@VitiPerkates, @VitiPerkates, 0);
 
 	RETURN (@fitimet - @shpenzimet) / @fitimet;
 END;
@@ -200,27 +202,36 @@ AS RETURN
 
 GO
 
-CREATE OR ALTER FUNCTION KalkuloTarifenMesatareVjetoreTeTrajtimit(@VitiPerkates INT)
+CREATE OR ALTER FUNCTION KalkuloTarifenMesatareVjetoreTeTrajtimit
+(
+	@VitiFillimtar INT = NULL,
+	@VitiPerfundimtar INT = NULL
+)
 RETURNS DECIMAL
 AS BEGIN
 	DECLARE @fitimetSherbimeve DECIMAL, @nrTrajtimeve INT;
 
 	SELECT @fitimetSherbimeve = FitimeFature
-	FROM GjeneroRaportFitimesh(0, @VitiPerkates);
+	FROM GjeneroRaportFitimesh(@VitiFillimtar, @VitiPerfundimtar, 0);
 
 	SELECT @nrTrajtimeve = COUNT(Id)
 	FROM Takim
 	WHERE 
+		EshteAnulluar = 0 AND
 		DataTakimit < GETDATE() AND
-		DATEPART(YEAR, DataTakimit) = @VitiPerkates AND 
-		EshteAnulluar = 0;
+		(@VitiFillimtar IS NULL OR DATEPART(YEAR, DataTakimit) >= @VitiFillimtar) AND
+		(@VitiPerfundimtar IS NULL OR DATEPART(YEAR, DataTakimit) <= @VitiPerfundimtar);
 
 	RETURN @fitimetSherbimeve / @nrTrajtimeve;
 END;
 
 GO
 
-CREATE OR ALTER FUNCTION KalkuloTarifenMesatareMujoreTeTrajtimit()
+CREATE OR ALTER FUNCTION KalkuloTarifenMesatareMujoreTeTrajtimit
+(
+	@VitiFillimtar INT = NULL,
+	@VitiPerfundimtar INT = NULL
+)
 RETURNS @rezultati TABLE(Viti INT, Muaji INT, TarifaMesatareTrajtimit DECIMAL)
 AS BEGIN
 	DECLARE @tabelaAgregatesMujoreTeTakimeve TABLE(Viti INT, Muaji INT, NrTakimeve INT);
@@ -236,7 +247,7 @@ AS BEGIN
 	GROUP BY DATEPART(YEAR, DataTakimit), DATEPART(MONTH, DataTakimit);
 
 	INSERT INTO @tabelaFitimeveMujoreNgaSherbimet 
-	SELECT * FROM GjeneroRaportFitimesh(1, NULL);
+	SELECT * FROM GjeneroRaportFitimesh(@VitiFillimtar, @VitiPerfundimtar, 1);
 
 	INSERT INTO @rezultati 
 	SELECT nrTakimeve.Viti, nrTakimeve.Muaji, (FitimeFature / NrTakimeve) AS TarifaMesatareTrajtimit
