@@ -74,39 +74,52 @@ END;
 
 GO
 
-CREATE OR ALTER FUNCTION KalkuloPerqindjenTakimeveAnulluara()
+CREATE OR ALTER FUNCTION KalkuloPerqindjenTakimeveAnulluara
+(
+	@DataFillimtare DATE = NULL,
+	@DataPerfundimtare DATE = NULL
+)
 RETURNS DECIMAL
 AS BEGIN
 	DECLARE @nrTotalTakimeve INT, @nrTakimeveAnulluara INT;
 
 	SELECT @nrTotalTakimeve = COUNT(Id)
-	FROM Takim;
+	FROM Takim
+	WHERE 
+		(@DataFillimtare IS NULL OR DataTakimit >= @DataFillimtare) AND
+		(@DataPerfundimtare IS NULL OR DataTakimit <= @DataPerfundimtare);
 
 	SELECT @nrTakimeveAnulluara = COUNT(Id)
 	FROM Takim
-	WHERE EshteAnulluar = 1;
+	WHERE 
+		EshteAnulluar = 1 AND
+		(@DataFillimtare IS NULL OR DataTakimit >= @DataFillimtare) AND
+		(@DataPerfundimtare IS NULL OR DataTakimit <= @DataPerfundimtare);
 
 	RETURN @nrTakimeveAnulluara / @nrTotalTakimeve;
 END;
 
 GO
 
-CREATE OR ALTER FUNCTION GjeneroFluksinMujorTeRegjistrimeveTePacienteve
+CREATE OR ALTER FUNCTION GjeneroFluksinRegjistrimeveTePacienteve
 (
-	@VitiFillimtar INT = NULL,
-	@VitiPerfundimtar INT = NULL
+	@VitiFillimtar INT,
+	@VitiPerfundimtar INT = NULL,
+	@DistributimMujor BIT -- Shto ndarje mujore ne raport
 )
 RETURNS TABLE
 AS RETURN
 	SELECT 
 		DATEPART(YEAR, DataRegjistrimit) AS Viti, 
-		DATEPART(MONTH, DataRegjistrimit) AS Muaji,
+		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, DataRegjistrimit) END AS Muaji,
 		COUNT(PersonId) AS NrPacienteve
 	FROM Pacient
 	WHERE 
-		(@VitiFillimtar IS NULL OR DATEPART(YEAR, DataRegjistrimit) >= @VitiFillimtar) AND
+		DATEPART(YEAR, DataRegjistrimit) >= @VitiFillimtar AND
 		(@VitiPerfundimtar IS NULL OR DATEPART(YEAR, DataRegjistrimit) <= @VitiPerfundimtar)
-	GROUP BY DATEPART(YEAR, DataRegjistrimit), DATEPART(MONTH, DataRegjistrimit);
+	GROUP BY 
+		DATEPART(YEAR, DataRegjistrimit), 
+		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, DataRegjistrimit) END;
 
 GO
 
