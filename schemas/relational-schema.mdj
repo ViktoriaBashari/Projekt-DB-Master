@@ -563,7 +563,7 @@
 							"top": 800,
 							"width": 320,
 							"height": 126,
-							"text": "- Ditet me te angazhuara te spitalit\n- Doktoret me te perdorur\n- Departamentet me te angazhuara/perdorura\n- Pacientet me te shpeshte\n- Raporti staf-kerkese (staffing ratio) per departament\n- Nr. pacienteve qe duhet te presin per te marre sherbim (data e krijimit kundrejt dates se takimit)"
+							"text": "- Doktoret me te perdorur\n- Departamentet me te angazhuara/perdorura\n- Pacientet me te shpeshte\n- Raporti staf-kerkese (staffing ratio) per departament\n- Nr. pacienteve qe duhet te presin per te marre sherbim (data e krijimit kundrejt dates se takimit)"
 						},
 						{
 							"_type": "UMLNoteView",
@@ -578,7 +578,7 @@
 							"top": 816,
 							"width": 167.52734375,
 							"height": 50,
-							"text": "- Statistika demografike"
+							"text": "- Fluksi i regjistrimeve"
 						},
 						{
 							"_type": "UMLNoteView",
@@ -647,6 +647,22 @@
 										},
 										{
 											"_type": "ERDColumnView",
+											"_id": "AAAAAAGUrBmVVEYBumg=",
+											"_parent": {
+												"$ref": "AAAAAAGUc8BbrTu7w7I="
+											},
+											"model": {
+												"$ref": "AAAAAAGUrBmVMUX+mcc="
+											},
+											"font": "Arial;13;0",
+											"parentStyle": true,
+											"left": 1029,
+											"top": 1099,
+											"width": 246.560546875,
+											"height": 13
+										},
+										{
+											"_type": "ERDColumnView",
 											"_id": "AAAAAAGUc8BbrTu9Chk=",
 											"_parent": {
 												"$ref": "AAAAAAGUc8BbrTu7w7I="
@@ -657,7 +673,7 @@
 											"font": "Arial;13;0",
 											"parentStyle": true,
 											"left": 1029,
-											"top": 1099,
+											"top": 1114,
 											"width": 246.560546875,
 											"height": 13
 										},
@@ -673,7 +689,7 @@
 											"font": "Arial;13;0",
 											"parentStyle": true,
 											"left": 1029,
-											"top": 1114,
+											"top": 1129,
 											"width": 246.560546875,
 											"height": 13
 										},
@@ -689,7 +705,7 @@
 											"font": "Arial;13;0",
 											"parentStyle": true,
 											"left": 1029,
-											"top": 1129,
+											"top": 1144,
 											"width": 246.560546875,
 											"height": 13
 										},
@@ -705,7 +721,7 @@
 											"font": "Arial;13;0",
 											"parentStyle": true,
 											"left": 1029,
-											"top": 1144,
+											"top": 1159,
 											"width": 246.560546875,
 											"height": 13
 										},
@@ -721,7 +737,7 @@
 											"font": "Arial;13;0",
 											"parentStyle": true,
 											"left": 1029,
-											"top": 1159,
+											"top": 1174,
 											"width": 246.560546875,
 											"height": 13
 										}
@@ -731,7 +747,7 @@
 									"left": 1024,
 									"top": 1079,
 									"width": 256.560546875,
-									"height": 98
+									"height": 113
 								}
 							],
 							"font": "Arial;13;0",
@@ -739,7 +755,7 @@
 							"left": 1024,
 							"top": 1056,
 							"width": 256.560546875,
-							"height": 121,
+							"height": 136,
 							"nameLabel": {
 								"$ref": "AAAAAAGUc8BbrTu6VQg="
 							},
@@ -1854,7 +1870,7 @@
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"left": 1238,
-									"top": 1261,
+									"top": 1269,
 									"height": 13,
 									"alpha": 1.5707963267948966,
 									"distance": 15,
@@ -1872,7 +1888,7 @@
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"left": 1239,
-									"top": 1196,
+									"top": 1211,
 									"height": 13,
 									"alpha": 0.5235987755982988,
 									"distance": 30,
@@ -1908,7 +1924,7 @@
 								"$ref": "AAAAAAGUc8BbrTu5iMs="
 							},
 							"lineStyle": 2,
-							"points": "1224:1177;1224:1360",
+							"points": "1224:1192;1224:1360",
 							"nameLabel": {
 								"$ref": "AAAAAAGUc8Bbrjv/4wM="
 							},
@@ -2165,7 +2181,7 @@
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"left": 1049,
-									"top": 1196,
+									"top": 1211,
 									"height": 13,
 									"alpha": -0.5235987755982988,
 									"distance": 30,
@@ -2183,7 +2199,7 @@
 								"$ref": "AAAAAAGUc8BbrjwGY+4="
 							},
 							"lineStyle": 2,
-							"points": "944:1304;1064:1304;1064:1177",
+							"points": "944:1304;1064:1304;1064:1192",
 							"nameLabel": {
 								"$ref": "AAAAAAGUc8BbrjwNdDM="
 							},
@@ -2233,7 +2249,7 @@
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"left": 1103,
-									"top": 1196,
+									"top": 1211,
 									"height": 13,
 									"alpha": 0.5235987755982988,
 									"distance": 30,
@@ -2269,7 +2285,7 @@
 								"$ref": "AAAAAAGUc8BbrTu5iMs="
 							},
 							"lineStyle": 2,
-							"points": "1088:1177;1088:1328;944:1328",
+							"points": "1088:1192;1088:1328;944:1328",
 							"nameLabel": {
 								"$ref": "AAAAAAGUc8BbrjwRltE="
 							},
@@ -3696,7 +3712,7 @@
 									"top": 1189,
 									"width": 219.033203125,
 									"height": 13,
-									"text": "Procedure"
+									"text": "Sherbim"
 								},
 								{
 									"_type": "ERDColumnCompartmentView",
@@ -3813,7 +3829,7 @@
 									"font": "Arial;13;1",
 									"parentStyle": true,
 									"left": 1816,
-									"top": 957,
+									"top": 965,
 									"width": 257.5126953125,
 									"height": 13,
 									"text": "Fature"
@@ -3837,10 +3853,11 @@
 											"model": {
 												"$ref": "AAAAAAGUc8BbtT6+3ks="
 											},
+											"visible": false,
 											"font": "Arial;13;0",
 											"parentStyle": true,
 											"left": 1821,
-											"top": 980,
+											"top": 996,
 											"width": 247.5126953125,
 											"height": 13
 										},
@@ -3856,7 +3873,7 @@
 											"font": "Arial;13;0",
 											"parentStyle": true,
 											"left": 1821,
-											"top": 995,
+											"top": 990,
 											"width": 247.5126953125,
 											"height": 13
 										},
@@ -3873,7 +3890,7 @@
 											"font": "Arial;13;0",
 											"parentStyle": true,
 											"left": 1877,
-											"top": -342,
+											"top": -326,
 											"width": 247.5126953125,
 											"height": 13
 										},
@@ -3889,7 +3906,7 @@
 											"font": "Arial;13;0",
 											"parentStyle": true,
 											"left": 1821,
-											"top": 1010,
+											"top": 1005,
 											"width": 247.5126953125,
 											"height": 13
 										},
@@ -3906,7 +3923,7 @@
 											"font": "Arial;13;0",
 											"parentStyle": true,
 											"left": 1917,
-											"top": -327,
+											"top": -311,
 											"width": 247.5126953125,
 											"height": 13
 										},
@@ -3922,7 +3939,7 @@
 											"font": "Arial;13;0",
 											"parentStyle": true,
 											"left": 1821,
-											"top": 1025,
+											"top": 1020,
 											"width": 247.5126953125,
 											"height": 13
 										},
@@ -3938,7 +3955,7 @@
 											"font": "Arial;13;0",
 											"parentStyle": true,
 											"left": 1821,
-											"top": 1040,
+											"top": 1035,
 											"width": 247.5126953125,
 											"height": 13
 										}
@@ -3946,17 +3963,17 @@
 									"font": "Arial;13;0",
 									"parentStyle": true,
 									"left": 1816,
-									"top": 975,
+									"top": 983,
 									"width": 257.5126953125,
-									"height": 83
+									"height": 70
 								}
 							],
 							"font": "Arial;13;0",
 							"parentStyle": false,
 							"left": 1816,
-							"top": 952,
+							"top": 960,
 							"width": 257.5126953125,
-							"height": 106,
+							"height": 93,
 							"nameLabel": {
 								"$ref": "AAAAAAGUc8BbrzxqkLg="
 							},
@@ -4020,7 +4037,7 @@
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"left": 1913,
-									"top": 1077,
+									"top": 1072,
 									"height": 13,
 									"alpha": -0.5235987755982988,
 									"distance": 30,
@@ -4038,7 +4055,7 @@
 								"$ref": "AAAAAAGUc8Bbqztywto="
 							},
 							"lineStyle": 2,
-							"points": "513:886;568:886;568:1552;1928:1552;1928:1058",
+							"points": "513:886;568:886;568:1552;1928:1552;1928:1053",
 							"nameLabel": {
 								"$ref": "AAAAAAGUc8Bbrzx1DdQ="
 							},
@@ -4154,7 +4171,7 @@
 									"parentStyle": true,
 									"left": 352,
 									"top": 1037,
-									"width": 155.4423828125,
+									"width": 182.17236328125,
 									"height": 13,
 									"text": "RolStafi"
 								},
@@ -4181,7 +4198,7 @@
 											"parentStyle": true,
 											"left": 357,
 											"top": 1060,
-											"width": 145.4423828125,
+											"width": 172.17236328125,
 											"height": 13
 										},
 										{
@@ -4197,7 +4214,7 @@
 											"parentStyle": true,
 											"left": 357,
 											"top": 1075,
-											"width": 145.4423828125,
+											"width": 172.17236328125,
 											"height": 13
 										}
 									],
@@ -4205,7 +4222,7 @@
 									"parentStyle": true,
 									"left": 352,
 									"top": 1055,
-									"width": 155.4423828125,
+									"width": 182.17236328125,
 									"height": 38
 								}
 							],
@@ -4213,7 +4230,7 @@
 							"parentStyle": false,
 							"left": 352,
 							"top": 1032,
-							"width": 155.4423828125,
+							"width": 182.17236328125,
 							"height": 61,
 							"nameLabel": {
 								"$ref": "AAAAAAGUc8Bbrzx9OrI="
@@ -4375,7 +4392,7 @@
 									},
 									"font": "Arial;13;0",
 									"parentStyle": false,
-									"left": 532,
+									"left": 559,
 									"top": 1057,
 									"height": 13,
 									"alpha": 0.5235987755982988,
@@ -4412,7 +4429,7 @@
 								"$ref": "AAAAAAGUc8Bbrzx8/eU="
 							},
 							"lineStyle": 2,
-							"points": "507:1078;568:1078;568:1160;1024:1160",
+							"points": "534:1078;568:1078;568:1160;1024:1160",
 							"nameLabel": {
 								"$ref": "AAAAAAGUc8BbrzyIYwc="
 							},
@@ -5596,7 +5613,7 @@
 								"$ref": "AAAAAAGUc8BbrTu2zb0="
 							},
 							"lineStyle": 1,
-							"points": "2111:1004;2075:1005"
+							"points": "2111:1005;2075:1005"
 						},
 						{
 							"_type": "UMLNoteLinkView",
@@ -5613,7 +5630,7 @@
 								"$ref": "AAAAAAGUc8BbrTu5iMs="
 							},
 							"lineStyle": 1,
-							"points": "1254:1178;1577:1375"
+							"points": "1268:1193;1575:1375"
 						},
 						{
 							"_type": "UMLNoteLinkView",
@@ -5630,7 +5647,7 @@
 								"$ref": "AAAAAAGUc8BbrzxpPGQ="
 							},
 							"lineStyle": 1,
-							"points": "1905:1059;1674:1375"
+							"points": "1909:1054;1674:1375"
 						}
 					]
 				},
@@ -5841,7 +5858,7 @@
 							},
 							"name": "Emertimi",
 							"type": "CHAR",
-							"length": "6"
+							"length": "7"
 						}
 					]
 				},
@@ -6475,6 +6492,17 @@
 							"length": 0,
 							"primaryKey": true,
 							"foreignKey": true
+						},
+						{
+							"_type": "ERDColumn",
+							"_id": "AAAAAAGUrBmVMUX+mcc=",
+							"_parent": {
+								"$ref": "AAAAAAGUc8BbtD4NqAE="
+							},
+							"name": "PunonjesId",
+							"type": "CHAR",
+							"length": "5",
+							"unique": true
 						},
 						{
 							"_type": "ERDColumn",
@@ -7220,7 +7248,8 @@
 							},
 							"name": "SistemiKardiovaskular",
 							"type": "NVARCHAR",
-							"length": "MAX"
+							"length": "MAX",
+							"nullable": true
 						}
 					]
 				},
@@ -7598,7 +7627,7 @@
 					"_parent": {
 						"$ref": "AAAAAAGUc8BbqTrjPcc="
 					},
-					"name": "Procedure",
+					"name": "Sherbim",
 					"ownedElements": [
 						{
 							"_type": "ERDRelationship",
@@ -7843,7 +7872,7 @@
 							"_parent": {
 								"$ref": "AAAAAAGUc8BbtT7GkLk="
 							},
-							"name": "Emri",
+							"name": "Emertimi",
 							"type": "NVARCHAR",
 							"length": "12"
 						}
