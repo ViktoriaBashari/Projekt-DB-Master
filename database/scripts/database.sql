@@ -155,16 +155,16 @@ CREATE INDEX ON AnamnezaFiziologjike
     (StafiPergjigjesId);
 
 
-CREATE TABLE anamnezafamiljare (
-    id INTEGER NOT NULL,
-    pacientid INTEGER NOT NULL,
-    stafipergjigjesid INTEGER NOT NULL,
-    lidhjafamiljare NVARCHAR NOT NULL,
-    datelindja DATE NOT NULL,
-    semundja NVARCHAR NOT NULL,
-    moshadiagnozes TINYINT,
-    shkakuvdekjes NVARCHAR,
-    datavdekjes DATE,
+CREATE TABLE Anamnezafamiljare (
+    Id INTEGER NOT NULL,
+    PacientId INTEGER NOT NULL,
+    StafiPergjigjesId INTEGER NOT NULL,
+    LidhjaFamiljare NVARCHAR NOT NULL,
+    Datelindja DATE NOT NULL,
+    Semundja NVARCHAR NOT NULL,
+    MoshaDiagnozes TINYINT,
+    ShkakuVdekjes NVARCHAR,
+    DataVdekjes DATE,
     PRIMARY KEY (id)
 );
 
@@ -174,13 +174,13 @@ CREATE INDEX ON anamnezafamiljare
     (stafipergjigjesid);
 
 
-CREATE TABLE anamnezasemundjes (
-    id INTEGER NOT NULL,
-    pacientid INTEGER NOT NULL,
-    stafipergjigjesid INTEGER NOT NULL,
-    semundja NVARCHAR NOT NULL,
-    datadiagnozes DATE NOT NULL,
-    eshtekronike boolean NOT NULL,
+CREATE TABLE AnamnezaSemundjes (
+    Id INTEGER NOT NULL,
+    PacientId INTEGER NOT NULL,
+    StafiPergjigjesId INTEGER NOT NULL,
+    Semundja NVARCHAR NOT NULL,
+    DataDiagnozes DATE NOT NULL,
+    EshteKronike boolean NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -190,14 +190,14 @@ CREATE INDEX ON anamnezasemundjes
     (stafipergjigjesid);
 
 
-CREATE TABLE anamnezaabuzimit (
-    id INTEGER NOT NULL,
-    pacientid INTEGER NOT NULL,
-    stafipergjigjesid INTEGER NOT NULL,
-    substanca NVARCHAR NOT NULL,
-    pershkrimi NVARCHAR,
-    datafillimit DATE NOT NULL,
-    dataperfundimit DATE,
+CREATE TABLE AnamnezaAbuzimit (
+    Id INTEGER NOT NULL,
+    PacientId INTEGER NOT NULL,
+    StafiPergjigjesId INTEGER NOT NULL,
+    Substanca NVARCHAR NOT NULL,
+    Pershkrimi NVARCHAR,
+    DataFillimit DATE NOT NULL,
+    DataPerfundimit DATE,
     PRIMARY KEY (id)
 );
 
@@ -207,16 +207,16 @@ CREATE INDEX ON anamnezaabuzimit
     (stafipergjigjesid);
 
 
-CREATE TABLE anamnezafarmakologjike (
-    id INTEGER NOT NULL,
-    pacientid INTEGER NOT NULL,
-    stafipergjigjesid INTEGER NOT NULL,
-    ilaci NVARCHAR NOT NULL,
-    doza NVARCHAR NOT NULL,
-    arsyeja NVARCHAR NOT NULL,
-    datafillimit DATE NOT NULL,
-    dataperfundimit DATE,
-    marreparecete boolean NOT NULL,
+CREATE TABLE AnamnezaFarmakologjike (
+    Id INTEGER NOT NULL,
+    PacientId INTEGER NOT NULL,
+    StafiPergjigjesId INTEGER NOT NULL,
+    Ilaci NVARCHAR NOT NULL,
+    Doza NVARCHAR NOT NULL,
+    Arsyeja NVARCHAR NOT NULL,
+    DataFillimit DATE NOT NULL,
+    DataPerfundimit DATE,
+    MarrePaRecete boolean NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -227,22 +227,22 @@ CREATE INDEX ON anamnezafarmakologjike
 
 
 CREATE TABLE procedure (
-    kodi CHAR(5) NOT NULL,
-    emri NVARCHAR NOT NULL,
-    pershkrimi NVARCHAR,
-    cmimi NUMERIC(20,2) NOT NULL,
+    Kodi CHAR(5) NOT NULL,
+    Emri NVARCHAR NOT NULL,
+    Pershkrimi NVARCHAR,
+    Cmimi NUMERIC(20,2) NOT NULL,
     PRIMARY KEY (kodi)
 );
 
 
 CREATE TABLE fature (
-    id INTEGER NOT NULL,
-    takimiid INTEGER NOT NULL,
-    kodprocedure CHAR(5) NOT NULL,
-    cmimi NUMERIC(20,5) NOT NULL,
-    datasherbimit DATE NOT NULL,
-    datapagimit DATETIME,
-    metodapagimitid TINYINT,
+    Id INTEGER NOT NULL,
+    Takimiid INTEGER NOT NULL,
+    KodProcedure CHAR(5) NOT NULL,
+    Cmimi NUMERIC(20,5) NOT NULL,
+    DataSherbimit DATE NOT NULL,
+    DataPagimit DATETIME,
+    MetodaPagimitId TINYINT,
     PRIMARY KEY (id)
 );
 
@@ -255,15 +255,15 @@ CREATE INDEX ON fature
 
 
 CREATE TABLE rolstafi (
-    id TINYINT NOT NULL,
-    emri NVARCHAR NOT NULL
+    Id TINYINT NOT NULL,
+    Emri NVARCHAR NOT NULL
 );
 
 
-CREATE TABLE adrese (
-    pacientid INTEGER NOT NULL,
-    rruga NVARCHAR NOT NULL,
-    qyteti NVARCHAR NOT NULL,
-    informacionshtese NVARCHAR,
+CREATE TABLE Adrese (
+    PacientId INTEGER NOT NULL,
+    Rruga NVARCHAR NOT NULL,
+    Qyteti NVARCHAR NOT NULL,
+    InformacionShtese NVARCHAR,
     PRIMARY KEY (pacientid)
 );
