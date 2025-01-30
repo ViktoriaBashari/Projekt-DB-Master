@@ -14,7 +14,7 @@ CREATE OR ALTER FUNCTION KalkuloShumenPapaguarNgaPacienti()
 RETURNS DECIMAL
 AS
 BEGIN
-	DECLARE @vleraTotale decimal
+	DECLARE @vleraTotale DECIMAL
 
 	SELECT @vleraTotale = SUM(fature.Cmimi)
 	FROM Fature AS fature
@@ -31,7 +31,7 @@ GO
 CREATE OR ALTER FUNCTION EshtePacientiNenKujdesinAnetaritStafit
 (
 	@PacientId INT, 
-	@StafPunonjesId CHAR
+	@StafPunonjesId CHAR(5)
 )
 RETURNS BIT
 AS BEGIN
@@ -237,9 +237,9 @@ END;
 GO
 
 CREATE OR ALTER FUNCTION MerrRolinPerdoruesit(@Username VARCHAR(MAX))
-RETURNS VARCHAR
+RETURNS VARCHAR(MAX)
 AS BEGIN
-	DECLARE @roli VARCHAR;
+	DECLARE @roli VARCHAR(MAX);
 
 	SELECT @roli = r.name
 	FROM sys.database_role_members rm
