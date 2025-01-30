@@ -6,8 +6,18 @@ GO
 -- User-defined data type
 
 CREATE TYPE NumerTelefoni
-	FROM CHAR(18) NULL;
+	FROM CHAR(18) NOT NULL;
 
+GO
+
+CREATE RULE Rregull_NumerTelefoni
+AS
+	@value LIKE '+[1-9]%' AND 
+	SUBSTRING(@value, 3, datalength(@value)) NOT LIKE '%[^0-9]%';
+
+GO
+
+EXEC sp_bindrule 'Rregull_NumerTelefoni', 'NumerTelefoni';
 GO
 
 -- Enums
