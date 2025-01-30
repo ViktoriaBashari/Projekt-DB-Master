@@ -76,6 +76,75 @@ END;
 
 GO
 
+CREATE OR ALTER TRIGGER ValidoShtiminTakimit
+ON Takim
+FOR INSERT
+AS BEGIN
+	DECLARE @dataTakimit DATETIME = (SELECT DataTakimit FROM INSERTED);
+	DECLARE @doktorId INT = (SELECT DoktorId FROM INSERTED),
+		@infermierId INT = (SELECT InfermierId FROM INSERTED);
+
+	IF CAST(@dataTakimit AS DATE) < CAST(GETDATE() AS DATE)
+	BEGIN
+		RAISERROR('Nuk mund te krijohet nje takim ne te kaluaren', 16, -1);
+		ROLLBACK TRANSACTION;
+	END
+
+	-- Kontrollo nese takimi eshte brenda orarit te stafit
+	IF NOT EXISTS(
+		SELECT 1
+		FROM OrariPloteStafit
+		WHERE 
+			StafId = @doktorId AND
+			(CAST(@dataTakimit AS TIME) between OraFilluese and OraPerfundimtare) AND 
+			DitaId = DATEPART(dw, @dataTakimit))
+		BEGIN
+			RAISERROR('Nuk mund te krijohet nje takim jashte orarit te doktorit perkates', 16, -1);
+			ROLLBACK TRANSACTION;
+		END
+
+	IF 
+		@infermierId IS NOT NULL AND
+		NOT EXISTS(
+			SELECT 1
+			FROM OrariPloteStafit
+			WHERE 
+				StafId = @infermierId AND
+				(CAST(@dataTakimit AS TIME) BETWEEN OraFilluese AND OraPerfundimtare) AND 
+				DitaId = DATEPART(dw, @dataTakimit))
+		BEGIN
+			RAISERROR('Nuk mund te krijohet nje takim jashte orarit te infermierit perkates', 16, -1);
+			ROLLBACK TRANSACTION;
+		END
+
+	-- check if it conflicts with other meetings, te pakten 1 ore per cdo takim
+	IF EXISTS(
+		SELECT *
+		FROM takim
+		WHERE 
+			(@dataTakimit BETWEEN DataTakimit AND DATEADD(MINUTE, 90, DataTakimit)) AND
+			DoktorId = @infermierId)
+		BEGIN
+			RAISERROR('Ekzistojne takime per kete afat kohor per doktorin perkates', 16, -1);
+			ROLLBACK TRANSACTION;
+		END
+
+	IF 
+		@infermierId IS NOT NULL AND
+		EXISTS(
+			SELECT *
+			FROM takim
+			WHERE 
+				(@dataTakimit BETWEEN DataTakimit AND DATEADD(MINUTE, 90, DataTakimit)) AND
+				DoktorId = @infermierId)
+		BEGIN
+			RAISERROR('Ekzistojne takime per kete afat kohor per doktorin perkates', 16, -1);
+			ROLLBACK TRANSACTION;
+		END
+END;
+
+GO
+
 CREATE OR ALTER TRIGGER ValidoPerditesiminTakimit
 ON Takim
 FOR UPDATE
@@ -90,6 +159,18 @@ AS BEGIN
 		END
 	ELSE
 		BEGIN
+			DECLARE @PersonIdAktual VARCHAR(MAX);
+
+			SELECT @PersonIdAktual = PersonId
+			FROM Staf
+			WHERE PunonjesId = CURRENT_USER;
+
+			IF (SELECT DoktorId FROM DELETED) != @PersonIdAktual OR (SELECT InfermierId FROM DELETED) != @PersonIdAktual
+				BEGIN
+					RAISERROR('Veprim i paautorizuar', 16, -1);
+					ROLLBACK TRANSACTION;
+				END
+
 			IF (SELECT EshteAnulluar FROM DELETED) = 1
 				BEGIN
 					RAISERROR('Nuk mund te perditesohet nje takim i anulluar', 16, -1);
@@ -115,10 +196,16 @@ END;
 
 GO
 
-CREATE OR ALTER TRIGGER ValidoShtiminFatures
+CREATE OR ALTER TRIGGER ValidoPerditesiminFatures
 ON Fature
-FOR INSERT
+FOR UPDATE
 AS BEGIN
+	IF (SELECT DataPagimit FROM DELETED) IS NOT NULL OR (SELECT MetodaPagimitId FROM DELETED) IS NOT NULL
+		BEGIN
+			RAISERROR('Nuk mund te ndryshohen data dhe metoda e pagimit', 16, -1);
+			ROLLBACK TRANSACTION;
+		END
+
 	IF (SELECT DataPagimit FROM INSERTED) IS NULL OR (SELECT MetodaPagimitId FROM INSERTED) IS NULL
 		BEGIN
 			RAISERROR('Data dhe metoda e pagimit duhen suportuar', 16, -1);
@@ -128,19 +215,25 @@ END;
 
 GO
 
-CREATE OR ALTER TRIGGER ValidoPerditesiminFatures
-ON Fature
-FOR UPDATE
+CREATE OR ALTER TRIGGER ShtoFaturePerTakim
+ON Takim
+AFTER INSERT, UPDATE
 AS BEGIN
-	IF (SELECT DataPagimit FROM DELETED) IS NOT NULL OR (SELECT MetodaPagimitId FROM DELETED) IS NOT NULL
+	IF EXISTS(SELECT * FROM DELETED) -- Nese eshte perditesuar
 		BEGIN
-			RAISERROR('Nuk mund te ndryshohen data dhe metoda e pagimit', 16, -1);
+			-- Fshije faturen e takimit nese eshte anulluar
+			IF UPDATE(EshteAnulluar) AND (SELECT EshteAnulluar FROM INSERTED) = 1
+				BEGIN
+					DELETE FROM Fature WHERE TakimId = (SELECT Id FROM INSERTED);
+					RETURN;
+				END
 		END
-
-	IF (SELECT DataPagimit FROM INSERTED) IS NULL OR (SELECT MetodaPagimitId FROM INSERTED) IS NULL
-		BEGIN
-			RAISERROR('Data dhe metoda e pagimit duhen suportuar', 16, -1);
-		END
+	
+	-- Shto fature nese shtohet takim ose takimit i eshte hequr anullimi
+	INSERT INTO Fature(TakimId, Cmimi)
+	SELECT i.Id, sherbim.Cmimi
+	FROM INSERTED AS i
+	INNER JOIN Sherbim AS sherbim ON i.SherbimId = sherbim.Kodi;
 END;
 
 GO
@@ -149,53 +242,46 @@ CREATE OR ALTER TRIGGER ShtoUserPasRegjistrimPacienti
 ON Pacient
 AFTER INSERT
 AS BEGIN
-	EXEC('CREATE OR ALTER LOGIN [NID]')
-	EXEC('CREATE OR ALTER USER [NID]')
-	EXEC('ALTER ROLE Pacient ADD MEMBER [NID]')
-	SELECT i.NID
-	FROM INSERTED AS i
+	DECLARE @NID VARCHAR(MAX) = (SELECT NID FROM INSERTED);
+	DECLARE @loginCommand VARCHAR(MAX) = 'CREATE LOGIN ' + QUOTENAME(@NID),
+		@userCommand VARCHAR(MAX) = 'CREATE USER ' + QUOTENAME(@NID),
+		@roleCommand VARCHAR(MAX) = 'ALTER ROLE Pacient ADD MEMBER ' + QUOTENAME(@NID);
+
+	EXEC(@loginCommand);
+	EXEC(@userCommand);
+	EXEC(@roleCommand);
 END;
 
 GO
 
-CREATE OR ALTER TRIGGER ShtoUserPasRegjistrimStaf
+CREATE OR ALTER TRIGGER ShtoUserPasRegjistrimStafi
 ON Staf
 AFTER INSERT
 AS BEGIN
-	EXEC('CREATE OR ALTER LOGIN [PunonjesId]')
-	EXEC('CREATE OR ALTER USER [PunonjesId]')
-	EXEC('ALTER ROLE Pacient ADD MEMBER [PunonjesId]')
-	SELECT i.PunonjesId
-	FROM INSERTED AS i
+	DECLARE @punonjesId VARCHAR(MAX) = (SELECT PunonjesId FROM INSERTED),
+			@roli VARCHAR(MAX) = (SELECT Emertimi FROM RolStafi WHERE Id = (SELECT RolId FROM INSERTED));
+
+	DECLARE @loginCommand VARCHAR(MAX) = 'CREATE LOGIN ' + QUOTENAME(@punonjesId),
+			@userCommand VARCHAR(MAX) = 'CREATE USER ' + QUOTENAME(@punonjesId),
+			@roleCommand VARCHAR(MAX) = 'ALTER ROLE ' + @roli + ' ADD MEMBER ' + QUOTENAME(@punonjesId);
+
+	EXEC(@loginCommand);
+	EXEC(@userCommand);
+	EXEC(@roleCommand);
 END;
 
 GO
 
-CREATE OR ALTER TRIGGER ShtoFaturePerTakim
-ON Takim
-AFTER INSERT, UPDATE
+CREATE OR ALTER TRIGGER FshiUserPasFshirjesStafit
+ON Staf
+AFTER DELETE
 AS BEGIN
-	-- Nese eshte perditesuar
-	IF EXISTS(SELECT * FROM DELETED)
-		BEGIN
-			IF UPDATE(EshteAnulluar)
-				BEGIN
-					-- Fshije faturen e takimit nese eshte anulluar
-					IF (SELECT EshteAnulluar FROM INSERTED) = 1
-						DELETE FROM Fature WHERE TakimId = (SELECT Id FROM INSERTED);
-					-- Shtoje faturen e takimit nese eshte hequr anullimi
-					ELSE
-						INSERT INTO Fature(TakimId, Cmimi)
-						SELECT i.Id, sherbim.Cmimi
-						FROM inserted as i
-						INNER JOIN Sherbim AS sherbim ON i.SherbimId = sherbim.Kodi;
-				END
-		END
-	ELSE
-		INSERT INTO Fature (TakimId, Cmimi)
-		SELECT i.Id, sherbim.Cmimi
-		FROM INSERTED AS i
-		INNER JOIN Sherbim AS sherbim ON i.SherbimId = sherbim.Kodi;
+	DECLARE @punonjesId INT = (SELECT PunonjesId FROM DELETED);
+	DECLARE @loginCommand VARCHAR(MAX) = 'DROP LOGIN ' + QUOTENAME(@punonjesId),
+			@userCommand VARCHAR(MAX) = 'DROP USER ' + QUOTENAME(@punonjesId);
+
+	EXEC(@loginCommand);
+	EXEC(@userCommand);
 END;
 
 GO

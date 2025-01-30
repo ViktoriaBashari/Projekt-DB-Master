@@ -1,6 +1,15 @@
 USE Spitali;
 GO
 
+CREATE OR ALTER FUNCTION MerrOrarinStafitPerkates(@StafPersonId INT)
+RETURNS TABLE
+AS RETURN
+	SELECT OraFilluese, OraPerfundimtare, Dita
+	FROM OrariPloteStafit
+	WHERE StafId  = @StafPersonId;
+
+GO
+
 CREATE OR ALTER FUNCTION KalkuloShumenPapaguarNgaPacienti()
 RETURNS DECIMAL
 AS
@@ -101,27 +110,6 @@ END;
 
 GO
 
-CREATE OR ALTER FUNCTION GjeneroFluksinRegjistrimeveTePacienteve
-(
-	@VitiFillimtar INT = NULL,
-	@VitiPerfundimtar INT = NULL,
-	@DistributimMujor BIT -- Shto ndarje mujore ne raport
-)
-RETURNS TABLE
-AS RETURN
-	SELECT 
-		DATEPART(YEAR, DataRegjistrimit) AS Viti, 
-		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, DataRegjistrimit) END AS Muaji,
-		COUNT(PersonId) AS NrPacienteve
-	FROM Pacient
-	WHERE 
-		(@VitiFillimtar IS NULL OR DATEPART(YEAR, DataRegjistrimit) >= @VitiFillimtar) AND
-		(@VitiPerfundimtar IS NULL OR DATEPART(YEAR, DataRegjistrimit) <= @VitiPerfundimtar)
-	GROUP BY 
-		DATEPART(YEAR, DataRegjistrimit), 
-		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, DataRegjistrimit) END;
-
-GO
 
 CREATE OR ALTER FUNCTION GjeneroShpenzimetVjetore(@VitiPerkates INT)
 RETURNS DECIMAL
@@ -174,31 +162,6 @@ AS BEGIN
 
 	RETURN (@fitimet - @shpenzimet) / @fitimet;
 END;
-
-GO
-
-CREATE OR ALTER FUNCTION GjeneroProceduratMeTePerdorura
-(
-	@DistributimMujor BIT, -- Shto ndarje mujore ne raport
-	@VitiPerkates INT = NULL
-)
-RETURNS TABLE
-AS RETURN
-	SELECT 
-		DATEPART(YEAR, takim.DataTakimit) AS Viti,
-		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, takim.DataTakimit) END AS Muaji,
-		sherb.Kodi, sherb.Emri, 
-		COUNT(takim.Id) AS NrTakimeve
-	FROM Sherbim AS sherb
-	INNER JOIN Takim AS takim ON takim.SherbimId = sherb.Kodi
-	WHERE
-		takim.EshteAnulluar = 0 AND 
-		(@VitiPerkates IS NULL OR DATEPART(YEAR, takim.DataTakimit) = @VitiPerkates)
-	GROUP BY 
-		sherb.Kodi,
-		sherb.Emri,
-		DATEPART(YEAR, takim.DataTakimit),
-		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, takim.DataTakimit) END;
 
 GO
 
@@ -259,46 +222,7 @@ END;
 
 GO
 
-CREATE OR ALTER FUNCTION GjeneroStafinMeTePerdorur
-(
-	@RolId INT,
-	@DistributimMujor BIT, -- Shto ndarje mujore ne raport
-	@VitiPerkates INT = NULL
-)
-RETURNS TABLE
-AS RETURN
-	SELECT person.Id, person.Emri, person.Mbiemri, COUNT(takim.Id) AS NrTakimeve
-	FROM Takim as takim
-	INNER JOIN Staf AS staf ON staf.PersonId = takim.DoktorId OR staf.PersonId = takim.InfermierId
-	INNER JOIN Person AS person ON person.Id = staf.PersonId
-	WHERE 
-		takim.EshteAnulluar = 0 AND 
-		(@VitiPerkates IS NULL OR DATEPART(YEAR, takim.DataTakimit) = @VitiPerkates) AND
-		staf.RolId = @RolId
-	GROUP BY 
-		person.Id, person.Emri, person.Mbiemri,
-		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, takim.DataTakimit) END;
-
-GO
-
-CREATE OR ALTER FUNCTION GjeneroPacientetMeTeShpeshte
-(
-	@VitiPerkates INT,
-	@MuajiPerkates INT = NULL -- Shto ndarje mujore ne raport
-)
-RETURNS TABLE
-AS RETURN
-	SELECT person.Id, person.Emri, person.Mbiemri, COUNT(takim.Id) AS NrTakimeve
-	FROM Pacient AS pacient
-	INNER JOIN Person AS person ON pacient.PersonId = person.Id
-	INNER JOIN Takim AS takim ON takim.PacientId = pacient.PersonId
-	WHERE 
-		takim.EshteAnulluar = 0 AND
-		DATEPART(YEAR, takim.DataTakimit) = @VitiPerkates AND
-		(@MuajiPerkates IS NULL OR DATEPART(MONTH, takim.DataTakimit) = @MuajiPerkates)
-	GROUP BY person.Id, person.Emri, person.Mbiemri;
-
-GO
+-- Funksione specifike per aplikacionin
 
 CREATE OR ALTER FUNCTION VerifikoFjalekaliminPerdoruesit(@Username VARCHAR(MAX), @Fjalekalimi VARCHAR(MAX))
 RETURNS BIT

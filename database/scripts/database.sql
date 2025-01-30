@@ -69,7 +69,7 @@ CREATE TABLE Departament (
 CREATE TABLE Sherbim (
     Kodi CHAR(5) NOT NULL PRIMARY KEY,
     Emri VARCHAR(55) NOT NULL,
-    Pershkrimi VARCHAR(300),
+    Pershkrimi VARCHAR(300) NULL,
     Cmimi DECIMAL(20,2) NOT NULL,
 
 	CONSTRAINT EmerUnikSherbimi UNIQUE(Emri),

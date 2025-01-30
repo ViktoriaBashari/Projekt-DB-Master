@@ -1,6 +1,24 @@
 USE Spitali;
 GO
 
+CREATE OR ALTER VIEW TakimetRecepsionist AS
+	SELECT Id, DataKrijimit, DataTakimit, DoktorId, InfermierId, PacientId, SherbimId, EshteAnulluar
+	FROM Takim;
+
+GO
+
+CREATE OR ALTER VIEW PersonPacient AS
+	SELECT Person.* FROM Person 
+	INNER JOIN Pacient ON Id = PersonId;
+
+GO
+
+CREATE OR ALTER VIEW PersonStaf AS 
+	SELECT Person.* FROM Person 
+	INNER JOIN Staf ON Id = PersonId;
+
+GO
+
 CREATE OR ALTER VIEW InformacionPublikStafi AS
 	SELECT s.PersonId, p.Emri, p.Mbiemri, s.RolId, s.Specialiteti, s.DepartamentId
 	FROM Staf AS s
@@ -36,74 +54,25 @@ CREATE OR ALTER VIEW PacientetNenKujdesinAnetaritStafit WITH SCHEMABINDING AS
 	SELECT person.Id, person.Emri, person.Mbiemri, person.Datelindja, person.GjiniaId, pacient.GrupiGjakut
 	FROM dbo.Pacient AS pacient
 	INNER JOIN dbo.Person AS person ON pacient.PersonId = person.Id;
-	--INNER JOIN Takim AS takim ON pacient.PersonId = takim.PacientId
-	--INNER JOIN Staf AS staf ON takim.DoktorId = staf.PersonId OR takim.InfermierId = staf.PersonId
-	--WHERE takim.EshteAnulluar = 0; -- AND staf.PunonjesId = CURRENT_USER;
 
 GO
 
---CREATE OR ALTER VIEW AnamnezaFamiljarePacientit AS
---	SELECT DISTINCT an.*
---	FROM AnamnezaFamiljare AS an
---	INNER JOIN Takim AS takim ON takim.PacientId = an.PacientId
---	INNER JOIN Staf AS doc ON doc.PersonId = takim.DoktorId
---	INNER JOIN Staf AS inf ON inf.PersonId = takim.InfermierId
---	WHERE doc.PunonjesId = CURRENT_USER OR inf.PunonjesId = CURRENT_USER
---;
-
---GO
-
---CREATE OR ALTER VIEW AnamnezaFiziologjikePacientit AS
---	SELECT an.*
---	FROM AnamnezaFiziologjike AS an
---	INNER JOIN Takim AS takim ON takim.PacientId = an.PacientId
---	INNER JOIN Staf AS doc ON doc.PersonId = takim.DoktorId
---	INNER JOIN Staf AS inf ON inf.PersonId = takim.InfermierId
---	WHERE doc.PunonjesId = CURRENT_USER OR inf.PunonjesId = CURRENT_USER
---;
-
---GO
-
---CREATE OR ALTER VIEW AnamnezaSemundjesPacientit AS
---	SELECT an.*
---	FROM AnamnezaSemundjes AS an
---	INNER JOIN Takim AS takim ON takim.PacientId = an.PacientId
---	INNER JOIN Staf AS doc ON doc.PersonId = takim.DoktorId
---	INNER JOIN Staf AS inf ON inf.PersonId = takim.InfermierId
---	WHERE doc.PunonjesId = CURRENT_USER OR inf.PunonjesId = CURRENT_USER
---;
-
---GO
-
---CREATE OR ALTER VIEW AnamnezaAbuzimitPacientit AS
---	SELECT an.*
---	FROM AnamnezaAbuzimit AS an
---	INNER JOIN Takim AS takim ON takim.PacientId = an.PacientId
---	INNER JOIN Staf AS doc ON doc.PersonId = takim.DoktorId
---	INNER JOIN Staf AS inf ON inf.PersonId = takim.InfermierId
---	WHERE doc.PunonjesId = CURRENT_USER OR inf.PunonjesId = CURRENT_USER
---;
-
---GO
-
---CREATE OR ALTER VIEW AnamnezaFarmakologjikePacientit AS
---	SELECT an.*
---	FROM AnamnezaFarmakologjike AS an
---	INNER JOIN Takim AS takim ON takim.PacientId = an.PacientId
---	INNER JOIN Staf AS doc ON doc.PersonId = takim.DoktorId
---	INNER JOIN Staf AS inf ON inf.PersonId = takim.InfermierId
---	WHERE doc.PunonjesId = CURRENT_USER OR inf.PunonjesId = CURRENT_USER
---;
-
---GO
-
-CREATE OR ALTER VIEW OrariVetjakStafit AS
-	SELECT turn.*, dite_jave.Emertimi
-	FROM Orar AS orar
-	INNER JOIN TurnOrari AS turn ON orar.TurnOrarId = turn.Id
+CREATE OR ALTER VIEW OrariPloteStafit AS
+	SELECT 
+		Orar.StafId, PunonjesId, 
+		turn.Id AS TurnId, turn.Emri AS EmriTurnit, turn.OraFilluese, turn.OraPerfundimtare,
+		DiteJaveId AS DitaId, dite_jave.Emertimi AS Dita
+	FROM Orar
+	INNER JOIN TurnOrari AS turn ON Orar.TurnOrarId = turn.Id
 	INNER JOIN DiteTurni AS dite_turni ON turn.Id = dite_turni.TurnOrarId
 	INNER JOIN DiteJave AS dite_jave ON dite_turni.DiteJaveId = dite_jave.Id
-	INNER JOIN Staf AS staf ON orar.StafId = staf.PersonId
-	WHERE staf.PunonjesId = CURRENT_USER;
+	INNER JOIN Staf ON Orar.StafId = Staf.PersonId;
+
+GO
+
+CREATE OR ALTER VIEW OrariPersonalStafit AS
+	SELECT OraFilluese, OraPerfundimtare, Dita
+	FROM OrariPloteStafit
+	WHERE PunonjesId = CURRENT_USER;
 
 GO
