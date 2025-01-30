@@ -1,11 +1,24 @@
-CREATE DATABASE Spitali;
-USE Spitali;
+CREATE DATABASE Spitali; 
+GO
+USE Spitali; 
+GO
 
 -- User-defined data type
 
 CREATE TYPE NumerTelefoni
-	FROM CHAR(18);
+	FROM CHAR(18) NOT NULL;
 
+GO
+
+CREATE RULE Rregull_NumerTelefoni
+AS
+	@value LIKE '+[1-9]%' AND 
+	SUBSTRING(@value, 3, datalength(@value)) NOT LIKE '%[^0-9]%';
+
+GO
+
+EXEC sp_bindrule 'Rregull_NumerTelefoni', 'NumerTelefoni';
+GO
 
 -- Enums
 
@@ -14,13 +27,31 @@ CREATE TABLE Gjinia (
     Emertimi CHAR(8) NOT NULL
 );
 
-INSERT INTO Gjinia
-VALUES (1, 'Femer'), (2, 'Mashkull');
-
 CREATE TABLE DiteJave (
     Id TINYINT NOT NULL PRIMARY KEY,
     Emertimi CHAR(7) NOT NULL
 );
+
+CREATE TABLE MetodePagimi (
+    Id TINYINT NOT NULL PRIMARY KEY,
+    Emertimi CHAR(7) NOT NULL
+);
+
+CREATE TABLE RolStafi (
+    Id TINYINT NOT NULL PRIMARY KEY,
+    Emertimi CHAR(12) NOT NULL
+);
+
+GO
+
+INSERT INTO Gjinia
+VALUES (1, 'Femer'), (2, 'Mashkull');
+
+INSERT INTO MetodePagimi
+VALUES (1, 'Dorezim'), (2, 'Karte');
+
+INSERT INTO RolStafi
+VALUES (1, 'Doktor'), (2, 'Infermier');
 
 INSERT INTO DiteJave
 VALUES
@@ -32,21 +63,7 @@ VALUES
 	(6, 'Shtune'),
 	(7, 'Diele');
 
-CREATE TABLE MetodePagimi (
-    Id TINYINT NOT NULL PRIMARY KEY,
-    Emertimi CHAR(6) NOT NULL
-);
-
-INSERT INTO MetodePagimi
-VALUES (1, 'Dorezim'), (2, 'Karte');
-
-CREATE TABLE RolStafi (
-    Id TINYINT NOT NULL PRIMARY KEY,
-    Emertimi CHAR(12) NOT NULL
-);
-
-INSERT INTO RolStafi
-VALUES (1, 'Doktor'), (2, 'Infermier');
+GO
 
 
 -- Entitetet
@@ -56,84 +73,90 @@ CREATE TABLE Departament (
     DrejtuesId INT NOT NULL,
     Emri VARCHAR(50) NOT NULL,
 
-	CONSTRAINT EmerUnik UNIQUE(Emri),
+	CONSTRAINT EmerUnikDepartamenti UNIQUE(Emri),
 );
 
 CREATE TABLE Sherbim (
     Kodi CHAR(5) NOT NULL PRIMARY KEY,
     Emri VARCHAR(55) NOT NULL,
-    Pershkrimi VARCHAR(300),
+    Pershkrimi VARCHAR(300) NULL,
     Cmimi DECIMAL(20,2) NOT NULL,
 
-	CONSTRAINT EmerUnik UNIQUE(Emri),
+	CONSTRAINT EmerUnikSherbimi UNIQUE(Emri),
 );
 
 
 CREATE TABLE Person (
     Id INT NOT NULL IDENTITY PRIMARY KEY,
-    Emri VARCHAR NOT NULL,
-    Mbiemri VARCHAR NOT NULL,
+    Emri VARCHAR(30) NOT NULL,
+    Mbiemri VARCHAR(30) NOT NULL,
     Datelindja DATE NOT NULL,
-    NrTelefoni NUMERTELEFONI NOT NULL,
+    NrTelefoni NumerTelefoni NOT NULL,
     GjiniaId TINYINT NOT NULL FOREIGN KEY REFERENCES Gjinia(Id),
 );
 
 CREATE INDEX EmriPlotePersonit ON Person (Emri, Mbiemri);
 
+GO
+
 CREATE TABLE Pacient (
     PersonId INT NOT NULL FOREIGN KEY REFERENCES Person(Id),
     NID CHAR(10) NOT NULL,
-    DataRegjistrimit DATE NOT NULL,
-    GrupiGjakut CHAR(3),
+    DataRegjistrimit DATE NOT NULL DEFAULT GETDATE(),
+    GrupiGjakut CHAR(3) NULL,
 
 	PRIMARY KEY (PersonId),
 	CONSTRAINT NIDUnik UNIQUE(NID),
 	CONSTRAINT VleratGrupitGjakut CHECK (GrupiGjakut IN ('A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-')),
 );
 
+GO
+
 CREATE TABLE Adrese (
     PacientId INT NOT NULL FOREIGN KEY REFERENCES Pacient(PersonId),
     Rruga VARCHAR(50) NOT NULL,
     Qyteti VARCHAR(20) NOT NULL,
-    InformacionShtese VARCHAR(100),
+    InformacionShtese VARCHAR(100) NULL,
 
     PRIMARY KEY (PacientId)
 );
 
 CREATE TABLE Staf (
-    PersonId INT NOT NULL PRIMARY KEY,
+    PersonId INT NOT NULL FOREIGN KEY REFERENCES Person(Id),
 	PunonjesId CHAR(5) NOT NULL,
     DepartamentId INT NOT NULL FOREIGN KEY REFERENCES Departament(Id),
     RolId TINYINT NOT NULL FOREIGN KEY REFERENCES RolStafi(Id),
     DataPunesimit DATE NOT NULL,
     Rroga DECIMAL(15,4) NOT NULL,
-    Specialiteti VARCHAR(50),
+    Specialiteti VARCHAR(50) NULL,
 
-	FOREIGN KEY (PersonId) REFERENCES Person(Id),
+	PRIMARY KEY (PersonId),
 	CONSTRAINT PunonjesIdUnik UNIQUE(PunonjesId),
 );
 
 CREATE INDEX DepartamentStafi ON Staf (DepartamentId);
 CREATE INDEX RolStafi ON Staf (RolId);
 
-ALTER TABLE Spitali.Departament
+ALTER TABLE Departament
 	ADD CONSTRAINT FK_Departament_DrejtuesId
-	FOREIGN KEY REFERENCES Staf(PersonId);
+	FOREIGN KEY (DrejtuesId) REFERENCES Staf(PersonId);
 
 CREATE INDEX DrejtuesDepartamenti ON Departament (DrejtuesId);
 
+GO
+
 CREATE TABLE Takim (
     Id INT NOT NULL IDENTITY PRIMARY KEY,
-    DataKrijimit DATETIME NOT NULL,
-    DataTakimit DATETIME NOT NULL,
+    DataKrijimit DATETIME NOT NULL DEFAULT GETDATE(),
+    DataTakimit DATETIME NOT NULL CHECK (CAST(DataTakimit AS DATE) >= CAST(GETDATE() AS DATE)),
     DoktorId INT NOT NULL FOREIGN KEY REFERENCES Staf(PersonId),
-    InfermierId INT FOREIGN KEY REFERENCES Staf(PersonId),
+    InfermierId INT  NULL FOREIGN KEY REFERENCES Staf(PersonId),
     PacientId INT NOT NULL FOREIGN KEY REFERENCES Pacient(PersonId),
     SherbimId CHAR(5) NOT NULL FOREIGN KEY REFERENCES Sherbim(Kodi),
-    ShqetesimiKryesor VARCHAR(MAX),
-    KohezgjatjaShqetesimit VARCHAR(100),
-    SimptomaTeLidhura VARCHAR(MAX),
-    Konkluzioni VARCHAR(MAX),
+    ShqetesimiKryesor VARCHAR(MAX) NULL,
+    KohezgjatjaShqetesimit VARCHAR(100) NULL,
+    SimptomaTeLidhura VARCHAR(MAX) NULL,
+    Konkluzioni VARCHAR(MAX) NULL,
     EshteAnulluar BIT NOT NULL DEFAULT 0,
 
 	CONSTRAINT OrarStafiUnik UNIQUE(DataTakimit, DoktorId),
@@ -144,16 +167,21 @@ CREATE INDEX InfermierTakimi ON Takim (InfermierId);
 CREATE INDEX PacientTakimi ON Takim (PacientId);
 CREATE INDEX SherbimTakimi ON Takim (SherbimId);
 
+GO
+
 CREATE TABLE Fature (
-    Id INT NOT NULL IDENTITY PRIMARY KEY,
     TakimId INT NOT NULL FOREIGN KEY REFERENCES Takim(Id),
     Cmimi DECIMAL(20,5) NOT NULL,
-    DataPagimit DATETIME,
+    DataPagimit DATETIME NULL,
     MetodaPagimitId TINYINT FOREIGN KEY REFERENCES MetodePagimi(Id),
+
+	PRIMARY KEY (TakimId),
 );
 
 CREATE INDEX TakimFature ON Fature (TakimId);
 CREATE INDEX MetodaPagimitFatures ON Fature (MetodaPagimitId);
+
+GO
 
 
 CREATE TABLE TurnOrari (
@@ -164,6 +192,8 @@ CREATE TABLE TurnOrari (
 
 	CONSTRAINT KohezgjatjeMinimale CHECK (DATEDIFF(MINUTE, OraFilluese, OraPerfundimtare) >= 10),
 );
+
+GO
 
 CREATE TABLE Orar (
     TurnOrarId INT NOT NULL FOREIGN KEY REFERENCES TurnOrari(Id),
@@ -185,20 +215,22 @@ CREATE TABLE DiteTurni (
 CREATE INDEX TurniDites ON DiteTurni (TurnOrarId);
 CREATE INDEX DitePerTurnin ON DiteTurni (DiteJaveId);
 
+GO
+
 
 CREATE TABLE AnamnezaFiziologjike (
     Id INT NOT NULL IDENTITY PRIMARY KEY,
     PacientId INT NOT NULL FOREIGN KEY REFERENCES Pacient(PersonId),
     StafiPergjegjesId INT NOT NULL FOREIGN KEY REFERENCES Staf(PersonId),
-    DataKrijimit DATETIME NOT NULL,
-    SistemiFrymemarrjes VARCHAR(MAX),
-    SistemiGjenitourinar VARCHAR(MAX),
-    SistemiTretes VARCHAR(MAX),
-    SistemiOkular VARCHAR(MAX),
-    SistemiNeurologjik VARCHAR(MAX),
-    SistemiOrl VARCHAR(MAX),
-    SistemiPsikiatrik VARCHAR(MAX),
-    SistemiKardiovaskular VARCHAR(MAX),
+    DataKrijimit DATETIME NOT NULL DEFAULT GETDATE(),
+    SistemiFrymemarrjes VARCHAR(MAX) NULL,
+    SistemiGjenitourinar VARCHAR(MAX) NULL,
+    SistemiTretes VARCHAR(MAX) NULL,
+    SistemiOkular VARCHAR(MAX) NULL,
+    SistemiNeurologjik VARCHAR(MAX) NULL,
+    SistemiOrl VARCHAR(MAX) NULL,
+    SistemiPsikiatrik VARCHAR(MAX) NULL,
+    SistemiKardiovaskular VARCHAR(MAX) NULL,
 );
 
 CREATE INDEX AnamnezaPacientit ON AnamnezaFiziologjike (PacientId);
@@ -211,9 +243,9 @@ CREATE TABLE AnamnezaFamiljare (
     LidhjaFamiljare VARCHAR(50) NOT NULL,
     Datelindja DATE NOT NULL,
     Semundja VARCHAR(50) NOT NULL,
-    MoshaDiagnozes TINYINT,
-    ShkakuVdekjes VARCHAR(80),
-    DataVdekjes DATE,
+    MoshaDiagnozes TINYINT NULL,
+    ShkakuVdekjes VARCHAR(80) NULL,
+    DataVdekjes DATE NULL,
 );
 
 CREATE INDEX AnamnezaPacientit ON AnamnezaFamiljare (PacientId);
@@ -236,9 +268,9 @@ CREATE TABLE AnamnezaAbuzimit (
     PacientId INT NOT NULL FOREIGN KEY REFERENCES Pacient(PersonId),
     StafiPergjegjesId INT NOT NULL FOREIGN KEY REFERENCES Staf(PersonId),
     Substanca VARCHAR(50) NOT NULL,
-    Pershkrimi VARCHAR(MAX),
+    Pershkrimi VARCHAR(MAX) NULL,
     DataFillimit DATE NOT NULL,
-    DataPerfundimit DATE,
+    DataPerfundimit DATE NULL,
 );
 
 CREATE INDEX AnamnezaPacientit ON AnamnezaAbuzimit (PacientId);
@@ -252,9 +284,11 @@ CREATE TABLE AnamnezaFarmakologjike (
     Doza VARCHAR(40) NOT NULL,
     Arsyeja VARCHAR(200) NOT NULL,
     DataFillimit DATE NOT NULL,
-    DataPerfundimit DATE,
+    DataPerfundimit DATE NULL,
     MarrePaRecete BIT NOT NULL,
 );
 
 CREATE INDEX AnamnezaPacientit ON AnamnezaFarmakologjike (PacientId);
 CREATE INDEX StafiAnamnezes ON AnamnezaFarmakologjike (StafiPergjegjesId);
+
+GO
