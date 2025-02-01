@@ -1,25 +1,25 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Data;
+using System.Text.Json;
+using Dapper;
+using HospitalManagement.Common.Enums;
+using HospitalManagement.Models.Data.Enums;
+using HospitalManagement.Models.Data.Person;
+using HospitalManagement.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 
 namespace HospitalManagement.Controllers;
 
-[Authorize]
+[Authorize(Roles = nameof(Roles.Administrator))]
 public class AdminController : BaseController
 {
-    public AdminController(IConfiguration configuration): base(configuration) { }
+    public AdminController(IConfiguration configuration) : base(configuration) { }
 
-    // Admin
+    [HttpGet]
     public async Task<IActionResult> Index()
     {
-        /*
-         * ndarjet madhor me tabs
-         * nenndarjet me scrollspy
-         * 
-         * shpenzimet + fitimet
-         * 
-         * performanca spitalit
-         * 
+        /* 
          * shiko stafin + orarin vetjak
          * shiko departamentet
          * shiko sherbimet
@@ -29,46 +29,294 @@ public class AdminController : BaseController
         var connectionString = _configuration.GetConnectionString(_dbConnectionStringName);
         using var connection = new SqlConnection(connectionString);
 
-        string performanceIndicatersQuery = """
-            EXECUTE AS @Username;
+        var performanceIndicators = await connection.QueryMultipleAsync(
+            """
+            EXECUTE AS USER = @Username;
 
+            SELECT * FROM RolStafi;
             SELECT dbo.GjeneroRaportinStafKerkese();
             SELECT dbo.KalkuloNormenMesatareTePritjesPerTakim();
-            SELECT dbo.KalkuloPerqindjenTakimeveAnulluara(@FirstDayCurrentYear, NULL);
-            
-            SELECT dbo.GjeneroFluksinRegjistrimeveTePacienteve(@CurrentYear, NULL, 1);
-            SELECT dbo.GjeneroShpenzimetVjetore(@CurrentYear);
-            SELECT dbo.GjeneroRaportFitimesh(@CurrentYear, NULL, 1);
-            SELECT dbo.GjeneroOperatingMarginVjetor(@CurrentYear);
-
-            SELECT dbo.KalkuloTarifenMesatareVjetoreTeTrajtimit(@CurrentYear, NULL);
-            SELECT dbo.KalkuloTarifenMesatareMujoreTeTrajtimit(@CurrentYear, NULL);
-
-            SELECT dbo.GjeneroStafinMeTePerdorur(0, NULL, @CurrentYear);
-            SELECT dbo.GjeneroProceduratMeTePerdorura(1, @CurrentYear);
-            SELECT dbo.GjeneroPacientetMeTeShpeshte(@CurrentYear, @CurrentMonth);
 
             REVERT;
-        """;
+            """,
+            new
+            {
+                Username = GetLoggedInUsername(),
+                FirstDayCurrentYear = $"{DateTime.Today.Year}-01-01",
+                CurrentYear = DateTime.Today.Year,
+                CurrentMonth = DateTime.Today.Month,
+            });
 
-        //var performanceIndicators = await connection.QueryMultipleAsync(
-        //    performanceIndicatersQuery,
-        //    new { 
-        //        Username = GetLoggedInUsername(), 
-        //        FirstDayCurrentYear = $"{DateTime.Today.Year}-01-01",
-        //        CurrentYear = DateTime.Today.Year,
-        //        CurrentMonth = DateTime.Today.Month,
-        //    });
+        ViewBag.StaffRoles = (await performanceIndicators.ReadAsync<RolStafi>()).ToArray();
 
-        //PerformanceIndicatorsVM model = new()
-        //{
-        //    StaffPatientRaport = await performanceIndicators.ReadSingleAsync(),
-        //    PatientMeetingWaitingTimeNorm = await performanceIndicators.ReadSingleAsync(),
-        //    CancelledMeetingPercentage = await performanceIndicators.ReadSingleAsync(),
+        var model = new PerformanceIndicatorsVM()
+        {
+            StaffPatientRaport = await performanceIndicators.ReadSingleAsync<decimal>(),
+            PatientMeetingWaitingTimeNorm = await performanceIndicators.ReadSingleAsync<decimal>(),
+        };
 
-        //};
+        await connection.CloseAsync();
+        return View(model);
+    }
 
-        return View();
+    [HttpGet]
+    public async Task<IActionResult> Departments()
+    {
+        var connectionString = _configuration.GetConnectionString(_dbConnectionStringName);
+        using var connection = new SqlConnection(connectionString);
+
+        var departaments = await connection.QueryAsync<Departament, Staf, Person, Departament>(
+            """
+            EXECUTE AS USER = @Username;
+            
+            SELECT 
+            	Departament.Id, Departament.Emri, 
+            	Departament.DrejtuesId, PersonStaf.Emri, PersonStaf.Mbiemri
+            FROM Departament
+            LEFT JOIN Staf ON DrejtuesId = Staf.PersonId
+            INNER JOIN PersonStaf ON PersonStaf.Id = Staf.PersonId;
+            
+            REVERT;
+            """,
+            (departament, staf, person) =>
+            {
+                departament.Drejtues = staf;
+
+                if(staf != null)
+                    departament.Drejtues.Person = person;
+
+                return departament;
+            },
+            new { Username = GetLoggedInUsername() });
+
+        return View(departaments.ToList());
+    }
+
+    //[HttpGet]
+    //public async Task<IActionResult> UpsertDepartment(Departament departament)
+    //{
+
+
+    //    //"""
+    //    //SELECT PersonId, PersonStaf.Emri, PersonStaf.Mbiemri
+    //    //FROM Staf
+    //    //INNER JOIN PersonStaf ON PersonStaf.Id = Staf.PersonId
+    //    //INNER JOIN RolStafi ON RolStafi.Id = RolId
+    //    //WHERE RolStafi.Emertimi = 'Doktor';
+    //    //""";
+    //    return View();
+    //}
+
+    //[HttpPost]
+    //public async Task<IActionResult> UpsertDepartment(Departament departament)
+    //{
+
+    //}
+
+    [HttpPost]
+    public async Task<decimal> CancelledAppointmentsPercentage(DateOnly? beginningDate = null, DateOnly? endingDate = null)
+    {
+        var connectionString = _configuration.GetConnectionString(_dbConnectionStringName);
+
+        using var connection = new SqlConnection(connectionString);
+        var command = await connection.QueryMultipleAsync(
+            """
+                EXECUTE AS USER = @Username;
+                SELECT dbo.KalkuloPerqindjenTakimeveAnulluara(@BeginningDate, @EndingDate);
+                REVERT;
+            """,
+            new { 
+                Username = GetLoggedInUsername(), 
+                BeginningDate = beginningDate.HasValue ? new DateTime(beginningDate.Value, TimeOnly.MinValue) : (DateTime?)null, 
+                EndingDate = endingDate.HasValue ? new DateTime(endingDate.Value, TimeOnly.MinValue) : (DateTime?)null });
+
+        var result = await command.ReadSingleAsync<decimal>();
+        await connection.CloseAsync();
+
+        return result;
+    }
+
+    [HttpPost]
+    public async Task<string> RegistrationTotals(int? beginningYear = null, int? endingYear = null, bool monthlyDistribution = false)
+    {
+        var connectionString = _configuration.GetConnectionString(_dbConnectionStringName);
+
+        using var connection = new SqlConnection(connectionString);
+        var command = await connection.QueryMultipleAsync(
+            """
+                EXECUTE AS USER = @Username;
+                EXEC dbo.GjeneroFluksinRegjistrimeveTePacienteve @BeginningYear, @EndingYear, @MonthlyDistribution;
+                REVERT;
+            """,
+            new
+            {
+                Username = GetLoggedInUsername(),
+                BeginningYear = beginningYear,
+                EndingYear = endingYear,
+                MonthlyDistribution = monthlyDistribution ? 1 : 0
+            });
+
+        var result = (await command.ReadAsync<Dictionary<string, object>>()).ToList();
+        await connection.CloseAsync();
+
+        return JsonSerializer.Serialize(result);
+    }
+
+    [HttpPost]
+    public async Task<decimal> YearlyCosts(int year)
+    {
+        var connectionString = _configuration.GetConnectionString(_dbConnectionStringName);
+
+        using var connection = new SqlConnection(connectionString);
+        var command = await connection.QueryMultipleAsync(
+            """
+                EXECUTE AS USER = @Username;
+                SELECT dbo.GjeneroShpenzimetVjetore(@Year);
+                REVERT;
+            """,
+            new { Username = GetLoggedInUsername(), Year = year });
+
+        var result = await command.ReadSingleAsync<decimal>();
+        await connection.CloseAsync();
+
+        return result;
+    }
+
+    [HttpPost]
+    public async Task<string> EarningsReport(int? beginningYear = null, int? endingYear = null, bool monthlyDistribution = false)
+    {
+        var connectionString = _configuration.GetConnectionString(_dbConnectionStringName);
+
+        using var connection = new SqlConnection(connectionString);
+        var command = await connection.QueryMultipleAsync(
+            """
+                EXECUTE AS USER = @Username;
+                SELECT * FROM dbo.GjeneroRaportFitimesh(@BeginningYear, @EndingYear, @MonthlyDistribution);
+                REVERT;
+            """,
+            new
+            {
+                Username = GetLoggedInUsername(),
+                BeginningYear = beginningYear,
+                EndingYear = endingYear,
+                MonthlyDistribution = monthlyDistribution ? 1 : 0
+            });
+
+        var result = (await command.ReadAsync<Dictionary<string, object>>()).ToList();
+        await connection.CloseAsync();
+
+        return JsonSerializer.Serialize(result);
+    }
+
+    [HttpPost]
+    public async Task<decimal> YearlyOperatingMargin(int year)
+    {
+        var connectionString = _configuration.GetConnectionString(_dbConnectionStringName);
+
+        using var connection = new SqlConnection(connectionString);
+        var command = await connection.QueryMultipleAsync(
+            """
+                EXECUTE AS USER = @Username;
+                SELECT dbo.GjeneroOperatingMarginVjetor(@Year);
+                REVERT;
+            """,
+            new { Username = GetLoggedInUsername(), Year = year });
+
+        var result = await command.ReadSingleAsync<decimal>();
+        await connection.CloseAsync();
+
+        return result;
+    }
+
+    [HttpPost]
+    public async Task<decimal> YearlyAverageTreatmentCharge(int? beginningYear = null, int? endingYear = null)
+    {
+        var connectionString = _configuration.GetConnectionString(_dbConnectionStringName);
+
+        using var connection = new SqlConnection(connectionString);
+        var command = await connection.QueryMultipleAsync(
+            """
+                EXECUTE AS USER = @Username;
+                SELECT dbo.KalkuloTarifenMesatareVjetoreTeTrajtimit(@BeginningYear, @EndingYear);
+                REVERT;
+            """,
+            new { Username = GetLoggedInUsername(), BeginningYear = beginningYear, EndingYear = endingYear });
+
+        var result = await command.ReadSingleAsync<decimal>();
+        await connection.CloseAsync();
+
+        return result;
+    }
+
+    [HttpPost]
+    public async Task<string> MonthlyAverageTreatmentCharge(int? beginningYear = null, int? endingYear = null, bool monthlyDistribution = false)
+    {
+        var connectionString = _configuration.GetConnectionString(_dbConnectionStringName);
+
+        using var connection = new SqlConnection(connectionString);
+        var command = await connection.QueryMultipleAsync(
+            """
+                EXECUTE AS USER = @Username;
+                SELECT * FROM dbo.KalkuloTarifenMesatareMujoreTeTrajtimit(@BeginningYear, @EndingYear);
+                REVERT;
+            """,
+            new { Username = GetLoggedInUsername(), BeginningYear = beginningYear, EndingYear = endingYear });
+
+        var result = (await command.ReadAsync<Dictionary<string, object>>()).ToList();
+        await connection.CloseAsync();
+
+        return JsonSerializer.Serialize(result);
+    }
+
+    [HttpPost]
+    public async Task<string> MostUsedStaffMembers(int? year = null, int? roleId = null, bool monthlyDistribution = false)
+    {
+        var connectionString = _configuration.GetConnectionString(_dbConnectionStringName);
+
+        using var connection = new SqlConnection(connectionString);
+        var command = await connection.QueryMultipleAsync(
+            """
+                EXECUTE AS USER = @Username;
+                EXEC dbo.GjeneroStafinMeTePerdorur @MonthlyDistribution, @RoleId, @Year;
+                REVERT;
+            """,
+            new
+            {
+                Username = GetLoggedInUsername(),
+                Year = year,
+                RoleId = roleId,
+                MonthlyDistribution = monthlyDistribution ? 1 : 0
+            });
+
+        var result = (await command.ReadAsync<Dictionary<string, object>>()).ToList();
+        await connection.CloseAsync();
+
+        return JsonSerializer.Serialize(result);
+    }
+
+    [HttpPost]
+    public async Task<string> MostPopularTreatments(int? year = null, bool monthlyDistribution = false)
+    {
+        var connectionString = _configuration.GetConnectionString(_dbConnectionStringName);
+
+        using var connection = new SqlConnection(connectionString);
+        var command = await connection.QueryMultipleAsync(
+            """
+                EXECUTE AS USER = @Username;
+                EXEC dbo.GjeneroProceduratMeTePerdorura @MonthlyDistribution, @Year;
+                REVERT;
+            """,
+            new
+            {
+                Username = GetLoggedInUsername(),
+                Year = year,
+                MonthlyDistribution = monthlyDistribution ? 1 : 0
+            });
+
+        var result = (await command.ReadAsync<Dictionary<string, object>>()).ToList();
+        await connection.CloseAsync();
+
+        return JsonSerializer.Serialize(result);
     }
 
     //public async Task<IEnumerable<Staf>> MedicalStaff(string? filterByRole = null, string? searchByName = null)

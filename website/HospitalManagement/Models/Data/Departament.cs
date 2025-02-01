@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using HospitalManagement.Models.Data.Person;
+﻿using HospitalManagement.Models.Data.Person;
 
 namespace HospitalManagement;
 
@@ -12,7 +10,5 @@ public partial class Departament
 
     public string Emri { get; set; } = null!;
 
-    public virtual Staf Drejtues { get; set; } = null!;
-
-    public virtual ICollection<Staf> Stafs { get; set; } = new List<Staf>();
+    public virtual Staf? Drejtues { get; set; }
 }

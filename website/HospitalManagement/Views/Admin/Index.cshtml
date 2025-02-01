@@ -1,0 +1,401 @@
+﻿@using HospitalManagement.Models.Data.Enums
+@using HospitalManagement.Models.ViewModels
+@model PerformanceIndicatorsVM
+
+@{
+	string dateOnlyStringFormat = "yyyy-MM-dd";
+
+	int baseYearInput = DateTime.UtcNow.Year;
+	string baseBeginDateInput = DateOnly.FromDateTime(new DateTime(DateTime.UtcNow.Year, 1, 1)).ToString(dateOnlyStringFormat),
+		baseEndDateInput = DateOnly.FromDateTime(DateTime.UtcNow).ToString(dateOnlyStringFormat);
+}
+
+@section Styles {
+	<link rel="stylesheet" href="https://cdn.datatables.net/2.2.1/css/dataTables.dataTables.css" />
+}
+
+<h1 class="text-primary fw-bold">Performanca e spitalit</h1>
+
+<table class="table table-striped">
+	<tr>
+		<td><b>Raporti staf-kerkese</b></td>
+		<td>@Model.StaffPatientRaport.ToString("0.000")</td>
+	</tr>
+
+	<tr>
+		<td><b>Norma e pritjes per takim per pacientet</b></td>
+		<td>@Model.PatientMeetingWaitingTimeNorm.ToString("0.000")</td>
+	</tr>
+
+	<tr>
+		<td>
+			<b>Perqindja e takimeve te anulluara</b>
+			<form id="cancelledAppointmentsForm" class="my-2 d-flex flex-row gap-2 align-items-center">
+				<div class="form-floating">
+					<input name="beginningDate" type="date" value="@baseBeginDateInput" class="form-control" />
+					<label for="beginningDate">Data fillimtare</label>
+				</div>
+
+				<div class="form-floating">
+					<input name="endingDate" type="date" value="@baseEndDateInput" class="form-control px-4" />
+					<label for="endingDate">Data perfundimtare</label>
+				</div>
+
+				<input type="submit" value="Rifresko" class="btn btn-secondary btn-sm" />
+			</form>
+		</td>
+		<td id="cancelledAppointmentsRow"></td>
+	</tr>
+
+	<tr>
+		<td>
+			<b>Norma e regjistrimeve</b>
+			<form id="registrationTotalsForm" class="my-2 d-flex flex-column gap-2 justify-content-evenly align-items-start">
+				<div class="d-flex gap-2">
+					<div class="form-floating">
+						<input name="beginningYear" type="number" value="@baseYearInput" class="form-control" />
+						<label for="beginningYear">Viti fillimtar</label>
+					</div>
+
+					<div class="form-floating">
+						<input name="endingYear" type="number" value="@baseYearInput" class="form-control" />
+						<label for="endingYear">Viti perfundimtare</label>
+					</div>
+				</div>
+
+				<div class="form-check">
+					<input name="monthlyDistribution" type="checkbox" checked class="form-check-input" />
+					<label for="monthlyDistribution" class="form-check-label">Distributim mujor</label>
+				</div>
+
+				<input type="submit" value="Rifresko" class="btn btn-secondary btn-sm" />
+			</form>
+		</td>
+		<td>
+			<table id="registrationTotals" class="table">
+				<thead></thead>
+				<tbody></tbody>
+			</table>
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			<b>Shpenzimet vjetore</b>
+			<form id="yearlyCostsForm" class="my-2 d-flex flex-row gap-2 align-items-center">
+				<div class="form-floating">
+					<input name="year" type="number" value="@baseYearInput" class="form-control" />
+					<label for="year">Viti</label>
+				</div>
+
+				<input type="submit" value="Rifresko" class="btn btn-secondary btn-sm" />
+			</form>
+		</td>
+		<td><span id="yearlyCosts"></span> LEK</td>
+	</tr>
+
+	<tr>
+		<td>
+			<b>Raport fitimesh</b>
+			<form id="earningsReportForm" class="my-2 d-flex flex-column gap-2 justify-content-evenly align-items-start">
+				<div class="d-flex gap-2">
+					<div class="form-floating">
+						<input name="beginningYear" type="number" value="@baseYearInput" class="form-control" />
+						<label for="beginningYear">Viti fillimtar</label>
+					</div>
+
+					<div class="form-floating">
+						<input name="endingYear" type="number" value="@baseYearInput" class="form-control" />
+						<label for="endingYear">Viti perfundimtare</label>
+					</div>
+				</div>
+
+				<div class="form-check">
+					<input name="monthlyDistribution" type="checkbox" checked class="form-check-input" />
+					<label for="monthlyDistribution" class="form-check-label">Distributim mujor</label>
+				</div>
+
+
+				<input type="submit" value="Rifresko" class="btn btn-secondary btn-sm" />
+			</form>
+		</td>
+		<td>
+			<table id="earningsReport" class="table">
+				<thead></thead>
+				<tbody></tbody>
+			</table>
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			<b>"Operating margin" vjetor</b>
+			<form id="yearlyOperatingMarginForm" class="my-2 d-flex flex-row gap-2 align-items-center">
+				<div class="form-floating">
+					<input name="year" type="number" value="@baseYearInput" class="form-control" />
+					<label for="year">Viti</label>
+				</div>
+
+				<input type="submit" value="Rifresko" class="btn btn-secondary btn-sm" />
+			</form>
+		</td>
+		<td id="yearlyOperatingMarginRow"></td>
+	</tr>
+
+	<tr>
+		<td>
+			<b>Tarifa mesatare e trajtimit (vjetore & mujore)</b>
+			<form id="averageTreatmentChargeForm" class="my-2 d-flex flex-column gap-2 justify-content-evenly align-items-start">
+				<div class="d-flex gap-2">
+					<div class="form-floating">
+						<input name="beginningYear" type="number" value="@baseYearInput" class="form-control" />
+						<label for="beginningYear">Viti fillimtar</label>
+					</div>
+
+					<div class="form-floating">
+						<input name="endingYear" type="number" value="@baseYearInput" class="form-control" />
+						<label for="endingYear">Viti perfundimtare</label>
+					</div>
+				</div>
+
+				<input type="submit" value="Rifresko" class="btn btn-secondary btn-sm" />
+			</form>
+		</td>
+		<td>
+			<b>Vjetore: </b> <span id="yearlyAverageTreatmentChargeResult"></span>
+			<br />
+			<b>Mujore:</b>
+			<table id="monthlyAverageTreatmentCharge" class="table">
+				<thead></thead>
+				<tbody></tbody>
+			</table>
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			<b>Stafi me i perdorur</b>
+			<form id="mostUsedStaffForm" class="my-2 d-flex flex-column gap-2 justify-content-evenly align-items-start">
+				<div class="d-flex gap-2">
+					<div class="form-floating">
+						<select name="roleId" class="form-select">
+							<option value="" selected>Te gjithe</option>
+							@foreach (RolStafi role in ViewBag.StaffRoles)
+							{
+								<option value="@role.Id">@role.Emertimi</option>
+							}
+						</select>
+						<label for="roleId">Roli</label>
+					</div>
+
+					<div class="form-floating">
+						<input name="year" type="number" value="@baseYearInput" class="form-control" />
+						<label for="year">Viti</label>
+					</div>
+				</div>
+
+				<div class="form-check">
+					<input name="monthlyDistribution" type="checkbox" checked class="form-check-input" />
+					<label for="monthlyDistribution" class="form-check-label">Distributim mujor</label>
+				</div>
+
+				<input type="submit" value="Rifresko" class="btn btn-secondary btn-sm" />
+			</form>
+		</td>
+		<td>
+			<table id="mostUsedStaff" class="table">
+				<thead></thead>
+				<tbody></tbody>
+			</table>
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			<b>Sherbimet me te perdorura</b>
+			<form id="mostPopularTreatmentsForm" class="my-2 d-flex flex-column gap-2 justify-content-evenly align-items-start">
+				<div class="form-floating">
+					<input name="year" type="number" value="@baseYearInput" class="form-control" />
+					<label for="year">Viti</label>
+				</div>
+
+				<div class="form-check">
+					<input name="monthlyDistribution" type="checkbox" checked class="form-check-input" />
+					<label for="monthlyDistribution" class="form-check-label">Distributim mujor</label>
+				</div>
+
+				<input type="submit" value="Rifresko" class="btn btn-secondary btn-sm" />
+			</form>
+		</td>
+		<td>
+			<table id="mostPopularTreatments" class="table">
+				<thead></thead>
+				<tbody></tbody>
+			</table>
+		</td>
+	</tr>
+</table>
+
+@section Scripts {
+	<script src="https://cdn.datatables.net/2.2.1/js/dataTables.js"></script>
+
+	<script>
+		const yearlyCostsRow = document.getElementById("yearlyCosts"),
+			yearlyOperatingMarginRow = document.getElementById("yearlyOperatingMarginRow"),
+			yearlyAverageTreatmentChargeResult = document.getElementById("yearlyAverageTreatmentChargeResult"),
+			cancelledAppointmentsRow = document.getElementById("cancelledAppointmentsRow");
+
+		const registrationTotalsForm = document.getElementById("registrationTotalsForm"),
+			yearlyCostsForm = document.getElementById("yearlyCostsForm"),
+			earningsReportForm = document.getElementById("earningsReportForm"),
+			yearlyOperatingMarginForm = document.getElementById("yearlyOperatingMarginForm"),
+			averageTreatmentChargeForm = document.getElementById("averageTreatmentChargeForm"),
+			mostUsedStaffForm = document.getElementById("mostUsedStaffForm"),
+			mostPopularTreatmentsForm = document.getElementById("mostPopularTreatmentsForm"),
+			cancelledAppointmentsForm = document.getElementById("cancelledAppointmentsForm");
+
+		// cancelled appointments
+		cancelledAppointmentsForm.addEventListener("submit", e => {
+			e.preventDefault();
+			$.ajax({
+				url: "@Url.Action("CancelledAppointmentsPercentage", "Admin")",
+				type: "POST",
+				data: {
+					beginningDate: cancelledAppointmentsForm.elements["beginningDate"].value,
+					endingDate: cancelledAppointmentsForm.elements["endingDate"].value
+				},
+				success: res => cancelledAppointmentsRow.textContent = res
+			});
+		});
+
+		// registration totals
+		let registrationTotalsTbl = new DataTable('#registrationTotals', {
+			"searching": false,
+			"ajax": {
+				"url": "@Url.Action("RegistrationTotals", "Admin")",
+				"data": function(d) {
+					d.beginningYear = registrationTotalsForm.elements["beginningYear"].value;
+					d.endingYear = registrationTotalsForm.elements["endingYear"].value;
+					d.monthlyDistribution = registrationTotalsForm.elements["monthlyDistribution"].checked;
+				},
+				"type": "post",
+				"datatype": "json"
+			}
+		});
+
+		registrationTotalsForm.addEventListener("submit", e => {
+			e.preventDefault();
+			registrationTotalsTbl.ajax.reload();
+		});
+
+		// yearly costs
+		yearlyCostsForm.addEventListener("submit", e => {
+			e.preventDefault();
+			$.ajax({
+				url: "@Url.Action("YearlyCosts", "Admin")",
+				type: "POST",
+				data: { year: yearlyCostsForm.elements["year"].value },
+				success: res => yearlyCostsRow.textContent = res
+			});
+		});
+
+		// earnings report
+		let earningsReportTbl = new DataTable("#earningsReport", {
+			"searching": false,
+			"ajax": {
+				"url": "@Url.Action("EarningsReport", "Admin")",
+				"data": function(d) {
+					d.beginningYear = earningsReportForm.elements["beginningYear"].value;
+					d.endingYear = earningsReportForm.elements["endingYear"].value;
+					d.monthlyDistribution = earningsReportForm.elements["monthlyDistribution"].checked;
+				},
+				"type": "post",
+				"datatype": "json"
+			}
+		})
+
+		earningsReportForm.addEventListener("submit", e => {
+			e.preventDefault();
+			earningsReportTbl.ajax.reload();
+		});
+
+		// yearly operating margin
+		yearlyOperatingMarginForm.addEventListener("submit", e => {
+			e.preventDefault();
+			$.ajax({
+				url: "@Url.Action("YearlyOperatingMargin", "Admin")",
+				type: "POST",
+				data: { year: yearlyOperatingMarginForm.elements["year"].value },
+				success: res => yearlyOperatingMarginRow.textContent = res
+			});
+		});
+
+		// average treatment charge
+		let monthlyAverageTreatmentChargeTbl = new DataTable("#monthlyAverageTreatmentCharge", {
+			"searching": false,
+			"ajax": {
+				"url": "@Url.Action("MonthlyAverageTreatmentCharge", "Admin")",
+				"data": function(d) {
+					d.beginningYear = averageTreatmentChargeForm.elements["beginningYear"].value;
+					d.endingYear = averageTreatmentChargeForm.elements["endingYear"].value;
+				},
+				"type": "post",
+				"datatype": "json"
+			}
+		})
+
+		averageTreatmentChargeForm.addEventListener("submit", e => {
+			e.preventDefault();
+
+			// yearly
+			$.ajax({
+				url: "@Url.Action("YearlyAverageTreatmentCharge", "Admin")",
+				type: "POST",
+				data: { year: averageTreatmentChargeForm.elements["year"].value },
+				success: res => yearlyAverageTreatmentChargeResult.textContent = res
+			});
+
+			//monthly
+			monthlyAverageTreatmentChargeTbl.ajax.reload();
+		});
+
+		// most used staff
+		let mostUsedStaffTbl = new DataTable("#mostUsedStaff", {
+			"searching": false,
+			"ajax": {
+				"url": "@Url.Action("MostUsedStaffMembers", "Admin")",
+				"data": function(d) {
+					d.year = mostUsedStaffForm.elements["year"].value;
+					d.monthlyDistribution = mostUsedStaffForm.elements["monthlyDistribution"].value;
+					d.roleId = mostUsedStaffForm.elements["roleId"].value;
+				},
+				"type": "post",
+				"datatype": "json"
+			}
+		});
+
+		mostUsedStaffForm.addEventListener("submit", e => {
+			e.preventDefault();
+			mostUsedStaffTbl.ajax.reload();
+		})
+
+		// most popular treatments
+		let mostPopularTreatmentsTbl = new DataTable("#mostPopularTreatments", {
+			"searching": false,
+			"ajax": {
+				"url": "@Url.Action("MostPopularTreatments", "Admin")",
+				"data": function(d) {
+					d.year = mostPopularTreatmentsForm.elements["year"].value;
+					d.monthlyDistribution = mostPopularTreatmentsForm.elements["monthlyDistribution"].value;
+				},
+				"type": "post",
+				"datatype": "json"
+			}
+		})
+
+		mostPopularTreatmentsForm.addEventListener("submit", e => {
+			e.preventDefault();
+			mostPopularTreatmentsTbl.ajax.reload();
+		})
+	</script>
+}
