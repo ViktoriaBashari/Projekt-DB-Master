@@ -56,11 +56,14 @@ RETURNS DECIMAL
 AS BEGIN
 	DECLARE @nrStafit INT, @nrPacienteve INT;
 
-	SELECT @nrStafit = COUNT(PersonId)
-	FROM Staf;
-
 	SELECT @nrPacienteve = COUNT(PersonId)
 	FROM Pacient;
+
+	IF @nrPacienteve = 0
+		RETURN 0;
+
+	SELECT @nrStafit = COUNT(PersonId)
+	FROM Staf;
 
 	RETURN @nrStafit / @nrPacienteve;
 END;
@@ -74,6 +77,9 @@ AS BEGIN
 	
 	SELECT @nrPacienteve = COUNT(PersonId)
 	FROM Pacient;
+
+	IF @nrPacienteve = 0
+		RETURN 0;
 
 	SELECT @kohaTotalePritjes = SUM(DATEDIFF(MINUTE, DataKrijimit, DataTakimit))
 	FROM Takim;
@@ -90,6 +96,9 @@ CREATE OR ALTER FUNCTION KalkuloPerqindjenTakimeveAnulluara
 )
 RETURNS DECIMAL
 AS BEGIN
+	IF @DataFillimtare > @DataPerfundimtare
+		THROW 400, 'Data fillimtare duhet te jete me e vogel se ajo perfundimtare', 1;
+	
 	DECLARE @nrTotalTakimeve INT, @nrTakimeveAnulluara INT;
 
 	SELECT @nrTotalTakimeve = COUNT(Id)
@@ -97,6 +106,9 @@ AS BEGIN
 	WHERE 
 		(@DataFillimtare IS NULL OR DataTakimit >= @DataFillimtare) AND
 		(@DataPerfundimtare IS NULL OR DataTakimit <= @DataPerfundimtare);
+
+	IF @nrTotalTakimeve = 0
+		RETURN 0;
 
 	SELECT @nrTakimeveAnulluara = COUNT(Id)
 	FROM Takim
@@ -160,7 +172,7 @@ AS BEGIN
 	SELECT @fitimet = FitimeFature
 	FROM GjeneroRaportFitimesh(@VitiPerkates, @VitiPerkates, 0);
 
-	RETURN (@fitimet - @shpenzimet) / @fitimet;
+	RETURN IIF(@fitimet = 0, 0, (@fitimet - @shpenzimet) / @fitimet);
 END;
 
 GO
@@ -174,9 +186,6 @@ RETURNS DECIMAL
 AS BEGIN
 	DECLARE @fitimetSherbimeve DECIMAL, @nrTrajtimeve INT;
 
-	SELECT @fitimetSherbimeve = FitimeFature
-	FROM GjeneroRaportFitimesh(@VitiFillimtar, @VitiPerfundimtar, 0);
-
 	SELECT @nrTrajtimeve = COUNT(Id)
 	FROM Takim
 	WHERE 
@@ -184,6 +193,12 @@ AS BEGIN
 		DataTakimit < GETDATE() AND
 		(@VitiFillimtar IS NULL OR DATEPART(YEAR, DataTakimit) >= @VitiFillimtar) AND
 		(@VitiPerfundimtar IS NULL OR DATEPART(YEAR, DataTakimit) <= @VitiPerfundimtar);
+
+	IF @nrTrajtimeve = 0
+		RETURN 0;
+
+	SELECT @fitimetSherbimeve = FitimeFature
+	FROM GjeneroRaportFitimesh(@VitiFillimtar, @VitiPerfundimtar, 0);
 
 	RETURN @fitimetSherbimeve / @nrTrajtimeve;
 END;
@@ -213,7 +228,9 @@ AS BEGIN
 	SELECT * FROM GjeneroRaportFitimesh(@VitiFillimtar, @VitiPerfundimtar, 1);
 
 	INSERT INTO @rezultati 
-	SELECT nrTakimeve.Viti, nrTakimeve.Muaji, (FitimeFature / NrTakimeve) AS TarifaMesatareTrajtimit
+	SELECT 
+		nrTakimeve.Viti, nrTakimeve.Muaji, 
+		IIF(NrTakimeve = 0, 0, FitimeFature / NrTakimeve) AS TarifaMesatareTrajtimit
 	FROM @tabelaAgregatesMujoreTeTakimeve AS nrTakimeve
 	INNER JOIN @tabelaFitimeveMujoreNgaSherbimet AS fitimet ON nrTakimeve.Viti = fitimet.Viti AND nrTakimeve.Muaji = fitimet.Muaji;
 

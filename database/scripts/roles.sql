@@ -103,7 +103,7 @@ GRANT SELECT ON dbo.KalkuloTarifenMesatareMujoreTeTrajtimit TO Administrator;
 GRANT EXECUTE ON dbo.GjeneroFluksinRegjistrimeveTePacienteve TO Administrator;
 GRANT EXECUTE ON dbo.GjeneroProceduratMeTePerdorura TO Administrator;
 GRANT EXECUTE ON dbo.GjeneroStafinMeTePerdorur TO Administrator;
-GRANT EXECUTE ON dbo.GjeneroPacientetMeTeShpeshte TO Administrator;
+GRANT EXECUTE ON dbo.GjeneroPacientetMeTeShpeshte TO Recepsionist;
 
 GRANT EXECUTE ON dbo.SelektoTakimetPacientit TO Recepsionist, Pacient;
 GRANT EXECUTE ON dbo.SelektoFaturatPacientit TO Recepsionist, Pacient;

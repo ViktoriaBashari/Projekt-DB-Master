@@ -1,6 +1,28 @@
 USE Spitali;
 GO
 
+CREATE OR ALTER TRIGGER ValidoShtiminOsePerditesiminDepartamentit
+ON Departament
+AFTER INSERT, UPDATE
+AS BEGIN
+	IF NOT EXISTS(SELECT * FROM DELETED) OR UPDATE(DrejtuesId)
+		BEGIN
+			IF NOT EXISTS(
+				SELECT 1
+				FROM Staf 
+				INNER JOIN RolStafi ON RolStafi.Id = RolId
+				WHERE 
+					RolStafi.Emertimi = 'Doktor' AND 
+					Staf.PersonId = (SELECT DrejtuesId FROM INSERTED))
+				BEGIN
+					RAISERROR('Drejtuesit duhet te jene doktore', 16, -1);
+					ROLLBACK TRANSACTION;
+				END
+		END
+END;
+
+GO
+
 CREATE OR ALTER TRIGGER ShtoAnamnezeFamiljare
 ON AnamnezaFamiljare
 INSTEAD OF INSERT

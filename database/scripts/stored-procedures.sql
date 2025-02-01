@@ -31,6 +31,7 @@ CREATE OR ALTER PROCEDURE GjeneroProceduratMeTePerdorura
 AS
 	SET NOCOUNT ON;
 	SELECT 
+		TOP 10
 		DATEPART(YEAR, takim.DataTakimit) AS Viti,
 		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, takim.DataTakimit) END AS Muaji,
 		sherb.Kodi, sherb.Emri, 
@@ -44,7 +45,8 @@ AS
 		sherb.Kodi,
 		sherb.Emri,
 		DATEPART(YEAR, takim.DataTakimit),
-		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, takim.DataTakimit) END;
+		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, takim.DataTakimit) END
+	ORDER BY COUNT(takim.Id);
 
 GO
 
@@ -56,7 +58,9 @@ CREATE OR ALTER PROCEDURE GjeneroStafinMeTePerdorur
 )
 AS 
 	SET NOCOUNT ON;
-	SELECT person.Id, person.Emri, person.Mbiemri, COUNT(takim.Id) AS NrTakimeve
+	SELECT 
+		TOP 10
+		person.Id, person.Emri, person.Mbiemri, COUNT(takim.Id) AS NrTakimeve
 	FROM Takim as takim
 	INNER JOIN Staf AS staf ON staf.PersonId = takim.DoktorId OR staf.PersonId = takim.InfermierId
 	INNER JOIN Person AS person ON person.Id = staf.PersonId
@@ -66,7 +70,8 @@ AS
 		staf.RolId = @RolId
 	GROUP BY 
 		person.Id, person.Emri, person.Mbiemri,
-		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, takim.DataTakimit) END;
+		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, takim.DataTakimit) END
+	ORDER BY COUNT(takim.Id);
 
 GO
 
@@ -77,7 +82,9 @@ CREATE OR ALTER PROCEDURE GjeneroPacientetMeTeShpeshte
 )
 AS 
 	SET NOCOUNT ON;
-	SELECT person.Id, person.Emri, person.Mbiemri, COUNT(takim.Id) AS NrTakimeve
+	SELECT 
+		TOP 10
+		person.Id, person.Emri, person.Mbiemri, COUNT(takim.Id) AS NrTakimeve
 	FROM Pacient AS pacient
 	INNER JOIN Person AS person ON pacient.PersonId = person.Id
 	INNER JOIN Takim AS takim ON takim.PacientId = pacient.PersonId
@@ -85,7 +92,8 @@ AS
 		takim.EshteAnulluar = 0 AND
 		DATEPART(YEAR, takim.DataTakimit) = @VitiPerkates AND
 		(@MuajiPerkates IS NULL OR DATEPART(MONTH, takim.DataTakimit) = @MuajiPerkates)
-	GROUP BY person.Id, person.Emri, person.Mbiemri;
+	GROUP BY person.Id, person.Emri, person.Mbiemri
+	ORDER BY COUNT(takim.Id);
 
 GO
 

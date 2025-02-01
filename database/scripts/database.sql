@@ -70,7 +70,7 @@ GO
 
 CREATE TABLE Departament (
     Id INT NOT NULL IDENTITY PRIMARY KEY,
-    DrejtuesId INT NOT NULL,
+    DrejtuesId INT NULL,
     Emri VARCHAR(50) NOT NULL,
 
 	CONSTRAINT EmerUnikDepartamenti UNIQUE(Emri),
