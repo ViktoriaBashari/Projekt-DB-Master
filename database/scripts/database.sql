@@ -5,15 +5,14 @@ GO
 
 -- User-defined data type
 
-CREATE TYPE NumerTelefoni
-	FROM CHAR(18) NOT NULL;
-
+CREATE TYPE NumerTelefoni FROM CHAR(18) NOT NULL;
 GO
 
 CREATE RULE Rregull_NumerTelefoni
 AS
 	@value LIKE '+[1-9]%' AND 
-	SUBSTRING(@value, 3, datalength(@value)) NOT LIKE '%[^0-9]%';
+	LEN(@value) >= 8 AND
+	SUBSTRING(@value, 3, LEN(@value)-2) NOT LIKE '%[^0-9]%';
 
 GO
 
@@ -92,7 +91,10 @@ CREATE TABLE Person (
     Mbiemri VARCHAR(30) NOT NULL,
     Datelindja DATE NOT NULL,
     NrTelefoni NumerTelefoni NOT NULL,
-    GjiniaId TINYINT NOT NULL FOREIGN KEY REFERENCES Gjinia(Id),
+    GjiniaId TINYINT NOT NULL 
+		FOREIGN KEY REFERENCES Gjinia(Id) 
+		ON DELETE RESTRICT 
+		ON UPDATE CASCADE,
 );
 
 CREATE INDEX EmriPlotePersonit ON Person (Emri, Mbiemri);
@@ -100,20 +102,27 @@ CREATE INDEX EmriPlotePersonit ON Person (Emri, Mbiemri);
 GO
 
 CREATE TABLE Pacient (
-    PersonId INT NOT NULL FOREIGN KEY REFERENCES Person(Id),
+    PersonId INT NOT NULL 
+		FOREIGN KEY REFERENCES Person(Id)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
     NID CHAR(10) NOT NULL,
     DataRegjistrimit DATE NOT NULL DEFAULT GETDATE(),
     GrupiGjakut CHAR(3) NULL,
 
 	PRIMARY KEY (PersonId),
 	CONSTRAINT NIDUnik UNIQUE(NID),
-	CONSTRAINT VleratGrupitGjakut CHECK (GrupiGjakut IN ('A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-')),
+	CONSTRAINT VleratGrupitGjakut CHECK 
+		(GrupiGjakut IN ('A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-')),
 );
 
 GO
 
 CREATE TABLE Adrese (
-    PacientId INT NOT NULL FOREIGN KEY REFERENCES Pacient(PersonId),
+    PacientId INT NOT NULL 
+		FOREIGN KEY REFERENCES Pacient(PersonId)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
     Rruga VARCHAR(50) NOT NULL,
     Qyteti VARCHAR(20) NOT NULL,
     InformacionShtese VARCHAR(100) NULL,
@@ -122,10 +131,19 @@ CREATE TABLE Adrese (
 );
 
 CREATE TABLE Staf (
-    PersonId INT NOT NULL FOREIGN KEY REFERENCES Person(Id),
+    PersonId INT NOT NULL 
+		FOREIGN KEY REFERENCES Person(Id)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
 	PunonjesId CHAR(5) NOT NULL,
-    DepartamentId INT NOT NULL FOREIGN KEY REFERENCES Departament(Id),
-    RolId TINYINT NOT NULL FOREIGN KEY REFERENCES RolStafi(Id),
+    DepartamentId INT NOT NULL 
+		FOREIGN KEY REFERENCES Departament(Id)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
+    RolId TINYINT NOT NULL 
+		FOREIGN KEY REFERENCES RolStafi(Id)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
     DataPunesimit DATE NOT NULL,
     Rroga DECIMAL(15,4) NOT NULL,
     Specialiteti VARCHAR(50) NULL,
@@ -139,7 +157,9 @@ CREATE INDEX RolStafi ON Staf (RolId);
 
 ALTER TABLE Departament
 	ADD CONSTRAINT FK_Departament_DrejtuesId
-	FOREIGN KEY (DrejtuesId) REFERENCES Staf(PersonId);
+	FOREIGN KEY (DrejtuesId) REFERENCES Staf(PersonId)
+	ON DELETE RESTRICT
+	ON UPDATE CASCADE;
 
 CREATE INDEX DrejtuesDepartamenti ON Departament (DrejtuesId);
 
@@ -149,10 +169,22 @@ CREATE TABLE Takim (
     Id INT NOT NULL IDENTITY PRIMARY KEY,
     DataKrijimit DATETIME NOT NULL DEFAULT GETDATE(),
     DataTakimit DATETIME NOT NULL CHECK (CAST(DataTakimit AS DATE) >= CAST(GETDATE() AS DATE)),
-    DoktorId INT NOT NULL FOREIGN KEY REFERENCES Staf(PersonId),
-    InfermierId INT  NULL FOREIGN KEY REFERENCES Staf(PersonId),
-    PacientId INT NOT NULL FOREIGN KEY REFERENCES Pacient(PersonId),
-    SherbimId CHAR(5) NOT NULL FOREIGN KEY REFERENCES Sherbim(Kodi),
+    DoktorId INT NOT NULL 
+		FOREIGN KEY REFERENCES Staf(PersonId)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
+    InfermierId INT  NULL 
+		FOREIGN KEY REFERENCES Staf(PersonId)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
+    PacientId INT NOT NULL 
+		FOREIGN KEY REFERENCES Pacient(PersonId)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
+    SherbimId CHAR(5) NOT NULL 
+		FOREIGN KEY REFERENCES Sherbim(Kodi)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
     ShqetesimiKryesor VARCHAR(MAX) NULL,
     KohezgjatjaShqetesimit VARCHAR(100) NULL,
     SimptomaTeLidhura VARCHAR(MAX) NULL,
@@ -170,10 +202,16 @@ CREATE INDEX SherbimTakimi ON Takim (SherbimId);
 GO
 
 CREATE TABLE Fature (
-    TakimId INT NOT NULL FOREIGN KEY REFERENCES Takim(Id),
+    TakimId INT NOT NULL 
+		FOREIGN KEY REFERENCES Takim(Id)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
     Cmimi DECIMAL(20,5) NOT NULL,
     DataPagimit DATETIME NULL,
-    MetodaPagimitId TINYINT FOREIGN KEY REFERENCES MetodePagimi(Id),
+    MetodaPagimitId TINYINT 
+		FOREIGN KEY REFERENCES MetodePagimi(Id)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
 
 	PRIMARY KEY (TakimId),
 );
@@ -190,14 +228,20 @@ CREATE TABLE TurnOrari (
     OraFilluese TIME NOT NULL,
     OraPerfundimtare TIME NOT NULL,
 
-	CONSTRAINT KohezgjatjeMinimale CHECK (DATEDIFF(MINUTE, OraFilluese, OraPerfundimtare) >= 10),
+	CONSTRAINT KohezgjatjeMinimale CHECK (DATEDIFF(MINUTE, OraFilluese, OraPerfundimtare) >= 60),
 );
 
 GO
 
 CREATE TABLE Orar (
-    TurnOrarId INT NOT NULL FOREIGN KEY REFERENCES TurnOrari(Id),
-    StafId INT NOT NULL FOREIGN KEY REFERENCES Staf(PersonId),
+    TurnOrarId INT NOT NULL 
+		FOREIGN KEY REFERENCES TurnOrari(Id)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
+    StafId INT NOT NULL 
+		FOREIGN KEY REFERENCES Staf(PersonId)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
 
     PRIMARY KEY (TurnOrarId, StafId),
 );
@@ -206,8 +250,14 @@ CREATE INDEX TurnPerOrarin ON Orar (TurnOrarId);
 CREATE INDEX StafiOrarit ON Orar (StafId);
 
 CREATE TABLE DiteTurni (
-    TurnOrarId INT NOT NULL FOREIGN KEY REFERENCES TurnOrari(Id),
-    DiteJaveId TINYINT NOT NULL FOREIGN KEY REFERENCES DiteJave(Id),
+    TurnOrarId INT NOT NULL 
+		FOREIGN KEY REFERENCES TurnOrari(Id)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
+    DiteJaveId TINYINT NOT NULL 
+		FOREIGN KEY REFERENCES DiteJave(Id)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
 
     PRIMARY KEY (TurnOrarId, DiteJaveId),
 );
@@ -220,8 +270,14 @@ GO
 
 CREATE TABLE AnamnezaFiziologjike (
     Id INT NOT NULL IDENTITY PRIMARY KEY,
-    PacientId INT NOT NULL FOREIGN KEY REFERENCES Pacient(PersonId),
-    StafiPergjegjesId INT NOT NULL FOREIGN KEY REFERENCES Staf(PersonId),
+    PacientId INT NOT NULL 
+		FOREIGN KEY REFERENCES Pacient(PersonId)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
+    StafiPergjegjesId INT NOT NULL 
+		FOREIGN KEY REFERENCES Staf(PersonId)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
     DataKrijimit DATETIME NOT NULL DEFAULT GETDATE(),
     SistemiFrymemarrjes VARCHAR(MAX) NULL,
     SistemiGjenitourinar VARCHAR(MAX) NULL,
@@ -238,8 +294,14 @@ CREATE INDEX StafiAnamnezes ON AnamnezaFiziologjike (StafiPergjegjesId);
 
 CREATE TABLE AnamnezaFamiljare (
     Id INT NOT NULL IDENTITY PRIMARY KEY,
-    PacientId INT NOT NULL FOREIGN KEY REFERENCES Pacient(PersonId),
-    StafiPergjegjesId INT NOT NULL FOREIGN KEY REFERENCES Staf(PersonId),
+    PacientId INT NOT NULL 
+		FOREIGN KEY REFERENCES Pacient(PersonId)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
+    StafiPergjegjesId INT NOT NULL 
+		FOREIGN KEY REFERENCES Staf(PersonId)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
     LidhjaFamiljare VARCHAR(50) NOT NULL,
     Datelindja DATE NOT NULL,
     Semundja VARCHAR(50) NOT NULL,
@@ -253,8 +315,14 @@ CREATE INDEX StafiAnamnezes ON AnamnezaFamiljare (StafiPergjegjesId);
 
 CREATE TABLE AnamnezaSemundjes (
     Id INT NOT NULL IDENTITY PRIMARY KEY,
-    PacientId INT NOT NULL FOREIGN KEY REFERENCES Pacient(PersonId),
-    StafiPergjegjesId INT NOT NULL FOREIGN KEY REFERENCES Staf(PersonId),
+    PacientId INT NOT NULL 
+		FOREIGN KEY REFERENCES Pacient(PersonId)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
+    StafiPergjegjesId INT NOT NULL 
+		FOREIGN KEY REFERENCES Staf(PersonId)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
     Semundja VARCHAR(50) NOT NULL,
     DataDiagnozes DATE NOT NULL,
     EshteKronike BIT NOT NULL,
@@ -265,8 +333,14 @@ CREATE INDEX StafiAnamnezes ON AnamnezaSemundjes (StafiPergjegjesId);
 
 CREATE TABLE AnamnezaAbuzimit (
     Id INT NOT NULL IDENTITY PRIMARY KEY,
-    PacientId INT NOT NULL FOREIGN KEY REFERENCES Pacient(PersonId),
-    StafiPergjegjesId INT NOT NULL FOREIGN KEY REFERENCES Staf(PersonId),
+    PacientId INT NOT NULL 
+		FOREIGN KEY REFERENCES Pacient(PersonId)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
+    StafiPergjegjesId INT NOT NULL 
+		FOREIGN KEY REFERENCES Staf(PersonId)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
     Substanca VARCHAR(50) NOT NULL,
     Pershkrimi VARCHAR(MAX) NULL,
     DataFillimit DATE NOT NULL,
@@ -278,8 +352,14 @@ CREATE INDEX StafiAnamnezes ON AnamnezaAbuzimit (StafiPergjegjesId);
 
 CREATE TABLE AnamnezaFarmakologjike (
     Id INT NOT NULL IDENTITY PRIMARY KEY,
-    PacientId INT NOT NULL FOREIGN KEY REFERENCES Pacient(PersonId),
-    StafiPergjegjesId INT NOT NULL FOREIGN KEY REFERENCES Staf(PersonId),
+    PacientId INT NOT NULL 
+		FOREIGN KEY REFERENCES Pacient(PersonId)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
+    StafiPergjegjesId INT NOT NULL 
+		FOREIGN KEY REFERENCES Staf(PersonId)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
     Ilaci VARCHAR(35) NOT NULL,
     Doza VARCHAR(40) NOT NULL,
     Arsyeja VARCHAR(200) NOT NULL,
