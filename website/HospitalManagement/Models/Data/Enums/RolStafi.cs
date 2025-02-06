@@ -1,7 +1,7 @@
 ﻿namespace HospitalManagement.Models.Data.Enums;
 
-public partial class RolStafi
+public class RolStafi
 {
-    public byte Id { get; set; }
+    public int Id { get; set; }
     public string Emertimi { get; set; } = null!;
 }

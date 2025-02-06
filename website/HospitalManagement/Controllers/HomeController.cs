@@ -79,7 +79,7 @@ namespace HospitalManagement.Controllers
             switch(User.FindFirst(ClaimTypes.Role)!.Value)
             {
                 case nameof(Roles.Administrator): 
-                    return RedirectToAction("Index", "Admin");
+                    return RedirectToAction(nameof(PerformanceController.Index), "Performance");
                 default:
                     return RedirectToAction(nameof(Logout));
             }

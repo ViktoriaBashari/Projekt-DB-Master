@@ -1,0 +1,100 @@
+﻿@using HospitalManagement.Models.Data
+@model List<Department>
+
+<h1 class="text-primary fw-bold">Departament</h1>
+
+<a asp-action="Upsert" class="btn btn-primary my-3">Shto departament te ri</a>
+
+<table class="table table-striped">
+	<tbody>
+		@foreach (var department in Model)
+		{
+			<tr id="dep-@department.Id">
+				<td>
+					<p class="fw-bold">@department.Emri</p>
+					<p>Drejtues: @(department.DrejtuesId.HasValue ? @department.DrejtuesEmri + " " + @department.DrejtuesMbiemri : "N/A")</p>
+				</td>
+				<td>
+					<a asp-action="Upsert" asp-route-id="@department.Id" class="btn btn-outline-secondary">Perditeso</a>
+					<button 
+						data-dep-id="@department.Id" 
+						data-dep-name="@department.Emri" 
+							data-bs-toggle="modal"
+							data-bs-target="#deleteDepModal"
+						class="btn btn-outline-danger">Fshi</button>
+				</td>
+			</tr>
+		}
+	</tbody>
+</table>
+
+<div id="deleteDepModal" class="modal" tabindex="-1">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Fshi departamentin</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form id="deleteDepForm">
+					<div class="mb-3">
+						<label for="department" class="form-label">Zgjidh departmentin e ri per stafin ekzistues te departamentit "<span id="toDeleteDepName"></span>""</label>
+						<select name="department" class="form-select"></select>
+					</div>
+
+					<input type="submit" name="submit" class="btn btn-primary" value="Fshi" />
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<script>
+		const deleteDepartmentModal = document.getElementById("deleteDepModal");
+		const deleteDepartmentForm = document.getElementById("deleteDepForm");
+
+		var currentDepartmentIdToUpdate = 0, currentDepartmentIdToDelete = 0;
+
+		// Delete
+		deleteDepartmentModal.addEventListener("show.bs.modal", e => {
+			deleteDepartmentForm.elements["submit"].disabled = true;
+			deleteDepartmentForm.elements["department"].options.length = 0;
+
+			const btn = e.relatedTarget;
+
+			currentDepartmentIdToDelete = btn.dataset.depId;
+			document.getElementById("toDeleteDepName").textContent = btn.dataset.depName;
+
+			$.ajax({
+				url: "@Url.Action("DepartmentPossibilities", "Departments")?excludeDepartmentId=" + btn.dataset.depId,
+				type: "GET",
+				success: departments => {
+					departments.forEach(department =>
+						deleteDepartmentForm.elements["department"]
+											.options.add(new Option(department.emri, department.id)));
+
+					deleteDepartmentForm.elements["submit"].disabled = false;
+				},
+				error: () => Toastify({ text: "Dicka nuk shkoi sic duhet: Tentoni perseri me vone"}).showToast()
+			});
+		})
+
+		deleteDepartmentForm.addEventListener("submit", e => {
+			e.preventDefault();
+
+			$.ajax({
+				url: "@Url.Action("DeleteDepartment", "Departments")",
+				type: "DELETE",
+				data: {
+					DeletedDepartmentId: currentDepartmentIdToDelete,
+					ReplacementDepartmentId: deleteDepartmentForm.elements["department"]
+																.options[deleteDepartmentForm.elements["department"].selectedIndex]
+																.value
+				},
+				success: () => document.getElementById(`dep-${currentDepartmentIdToDelete}`).remove(),
+				error: () => Toastify({ text: "Dicka nuk shkoi sic duhet: Tentoni perseri me vone"}).showToast()
+			})
+		});
+	</script>
+}

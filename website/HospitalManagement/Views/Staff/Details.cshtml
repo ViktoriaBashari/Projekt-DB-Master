@@ -1,0 +1,89 @@
+﻿@using HospitalManagement.Models.ViewModels
+@model StaffDetailsVM
+
+@section Styles {
+	<link rel="stylesheet" href="~/lib/timetable/dist/css/timetable.css" />
+}
+
+<div class="mt-5">
+	<h4 class="text-primary fw-bold">@Model.Staff.Emri @Model.Staff.Mbiemri</h4>
+	<h5>ID: @Model.Staff.PunonjesId</h5>
+
+	<div class="d-flex gap-5 mt-5">
+		<div>
+			<h5 class="fw-bold fst-italic">Informacion personal</h5>
+
+			<table class="table">
+				<tbody>
+					<tr>
+						<th>Datelindja:</th>
+						<td>@Model.Staff.Datelindja.ToShortDateString() (@(DateTime.UtcNow.Year - Model.Staff.Datelindja.Year) vjec)</td>
+					</tr>
+					<tr>
+						<th>Gjinia:</th>
+						<td>@Model.Staff.GjiniaEmertimi</td>
+					</tr>
+					<tr>
+						<th>Nr. telefonit:</th>
+						<td>@Model.Staff.NrTelefoni</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div>
+			<h5 class="fw-bold fst-italic">Informacion profesional</h5>
+
+			<table class="table">
+				<tbody>
+					<tr>
+						<th>Roli:</th>
+						<td>@Model.Staff.RolEmertimi</td>
+					</tr>
+					<tr>
+						<th>Departamenti:</th>
+						<td>@Model.Staff.DepartamentEmri</td>
+					</tr>
+					<tr>
+						<th>Specialiteti:</th>
+						<td>@(Model.Staff.Specialiteti ?? "N/A")</td>
+					</tr>
+					<tr>
+						<th>Rroga:</th>
+						<td>@Model.Staff.Rroga.ToString("0.00") LEK</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<hr />
+
+	<div>
+		<h5 class="fw-bold fst-italic">Orari</h5>
+		<div class="timetable"></div>
+	</div>
+</div>
+
+@section Scripts {
+	<script src="~/lib/timetable/dist/js/timetable.js"></script>
+	<script>
+		const scheduleData = @Html.Raw(Json.Serialize(Model.Schedule));
+		const weekDays = ["Hene", "Marte", "Merkure", "Enjte", "Premte", "Shtune", "Diele"];
+		const baseDay = "2000-01-01";
+
+		var schedule = new Timetable();
+		schedule.setScope(0, 23);
+		schedule.addLocations(weekDays);
+
+		scheduleData.forEach(dt => {
+			schedule.addEvent(
+				dt.emriTurnit,
+				weekDays[dt.ditaId - 1],
+				new Date(`${baseDay}T${dt.oraFilluese}`),
+				new Date(`${baseDay}T${dt.oraPerfundimtare}`),)
+		});
+
+		new Timetable.Renderer(schedule).draw(".timetable");
+	</script>
+}
