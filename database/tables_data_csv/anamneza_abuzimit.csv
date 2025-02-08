@@ -1,0 +1,21 @@
+﻿Id,PacientId,StafiPergjegjesId,Substanca,Pershkrimi,DataFillimit,DataPerfundimit
+1,24,13,Alkool,Përdorim i rrallë,2007-05-22,2011-02-05
+2,32,11,Duhan,Përdorim i shpeshtë,2011-03-25,
+3,40,9,Marihuanë,Varësi e rëndë,2006-03-30,2009-02-03
+4,33,11,Droga të forta,Eksperimentim,2022-04-30,
+5,27,5,Alkool,Përdorim i rrallë,2001-05-12,2002-07-23
+6,25,10,Duhan,Përdorim i shpeshtë,2023-11-11,
+7,33,9,Marihuanë,Varësi e rëndë,2001-07-31,2011-02-06
+8,37,9,Droga të forta,Eksperimentim,2017-12-25,
+9,21,18,Alkool,Përdorim i rrallë,2006-07-11,2013-02-07
+10,38,16,Duhan,Përdorim i shpeshtë,2015-07-02,
+11,23,4,Marihuanë,Varësi e rëndë,2022-12-30,2009-02-09
+12,28,8,Droga të forta,Eksperimentim,2006-12-03,
+13,21,16,Alkool,Përdorim i rrallë,2018-08-30,2019-04-03
+14,25,19,Duhan,Përdorim i shpeshtë,2001-01-30,
+15,22,9,Marihuanë,Varësi e rëndë,2021-01-11,2004-11-27
+16,26,8,Droga të forta,Eksperimentim,2008-07-29,
+17,28,10,Alkool,Përdorim i rrallë,2012-02-02,2016-06-25
+18,33,9,Duhan,Përdorim i shpeshtë,2014-10-09,
+19,39,8,Marihuanë,Varësi e rëndë,2007-05-10,2002-12-23
+20,33,3,Droga të forta,Eksperimentim,2019-12-27,
