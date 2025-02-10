@@ -1,0 +1,21 @@
+Kodi,Emri,Pershkrimi,Cmimi
+SH001,Konsulte Mjekesore,Vizite e pergjithshme nga mjeku specialist.,2500
+SH002,Analiza Gjakut,Testim laboratorik i gjakut per parametrat kryesore.,1500
+SH003,Eko Abdominale,Ekografi per vleresimin e organeve abdominale.,3000
+SH004,Radiografi Pulmonare,Rreze X per mushkerite dhe toraksin.,2800
+SH005,Elektrokardiogram (EKG),Matja e aktivitetit elektrik te zemres.,2000
+SH006,MRI Trurit,Rezonance magnetike per diagnostikim te trurit.,15000
+SH007,CT Scan Abdominal,Tomografi kompjuterike per regjionin abdominal.,12000
+SH008,Testi i Diabetit,Matja e nivelit te glukozes ne gjak.,1000
+SH009,Kujdesi Intensiv,Trajtim emergjent per gjendje kritike.,25000
+SH010,Kirurgji e Pergjithshme,Operacion per semundje te ndryshme kirurgjikale.,50000
+SH011,Transfuzion Gjakut,Dhenia e gjakut per pacientet ne nevoje.,8000
+SH012,Dialize,Trajtim per pacientet me insuficience renale.,12000
+SH013,Fizioterapi,Seanca fizioterapie per rehabilitim.,3000
+SH014,Vaksinim,Aplikim i vaksinave per parandalim te semundjeve.,2000
+SH015,Eko morfologjike,Kontrolle dhe trajtime gjinekologjike.,3500
+SH016,Endoskopi,Procedure per ekzaminimin e traktit gastrointestinal.,9000
+SH017,Psikoterapi,Seanca terapie per shendetin mendor.,5000
+SH018,Test Alergjie,Test per identifikimin e alergjive.,4500
+SH019,Oftalmologji,Kontroll i syve dhe shikimit.,2500
+SH020,Audiometri,Test per matjen e degjimit.,3000

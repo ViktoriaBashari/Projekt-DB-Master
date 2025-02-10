@@ -183,9 +183,9 @@ FOR UPDATE
 AS BEGIN
 	IF IS_ROLEMEMBER('Receptionist', CURRENT_USER) = 1
 		BEGIN
-			IF (SELECT DataTakimit FROM DELETED) < GETDATE()
+			IF EXISTS(SELECT 1 FROM DELETED WHERE DataTakimit < GETDATE())
 				BEGIN
-					RAISERROR('Perditesimi nuk lejohet pas ores se takimit', 16, -1);
+					RAISERROR('Nuk lejohet perditesimi i takimit pas ores se takimit', 16, -1);
 					ROLLBACK TRANSACTION;
 				END
 
@@ -231,15 +231,10 @@ AS BEGIN
 				END
  
 			IF
-				((SELECT ShqetesimiKryesor FROM INSERTED) IS NOT NULL OR 
-				(SELECT KohezgjatjaShqetesimit FROM INSERTED) IS NOT NULL OR 
-				(SELECT SimptomaTeLidhura FROM INSERTED) IS NOT NULL OR 
-				(SELECT Konkluzioni FROM INSERTED) IS NOT NULL)
-				AND
-				((SELECT ShqetesimiKryesor FROM DELETED) IS NOT NULL OR 
-				(SELECT KohezgjatjaShqetesimit FROM DELETED) IS NOT NULL OR 
-				(SELECT SimptomaTeLidhura FROM DELETED) IS NOT NULL OR 
-				(SELECT Konkluzioni FROM DELETED) IS NOT NULL)
+				UPDATE(ShqetesimiKryesor) OR
+				UPDATE(KohezgjatjaShqetesimit) OR
+				UPDATE(SimptomaTeLidhura) OR
+				UPDATE(Konkluzioni)
 				BEGIN
 					RAISERROR('Nuk mund te perditesohet informacioni mjekesor i takimit', 16, -1);
 					ROLLBACK TRANSACTION;
@@ -253,7 +248,9 @@ CREATE OR ALTER TRIGGER ValidoPerditesiminFatures
 ON Fature
 FOR UPDATE
 AS BEGIN
-	IF EXISTS(SELECT 1 FROM DELETED WHERE DataPagimit IS NOT NULL)
+	IF 
+    (UPDATE(DataPagimit) OR UPDATE(MetodaPagimitId)) AND
+    EXISTS(SELECT 1 FROM DELETED WHERE DataPagimit IS NOT NULL OR MetodaPagimitId IS NOT NULL)
 		BEGIN
 			RAISERROR('Nuk mund te ndryshohen data dhe metoda e pagimit pasi jane populluar', 16, -1);
 			ROLLBACK TRANSACTION;
@@ -277,8 +274,11 @@ AS BEGIN
 			-- Fshije faturen e takimit nese eshte anulluar
 			IF UPDATE(EshteAnulluar)
 				BEGIN
-					DELETE FROM Fature 
-					WHERE TakimId IN (SELECT Id FROM INSERTED WHERE EshteAnulluar = 1);
+					DELETE f FROM Fature AS f
+					INNER JOIN INSERTED AS i ON i.Id = f.TakimId
+					WHERE i.EshteAnulluar = 1;
+          
+					RETURN;
 				END
 		END
 	ELSE

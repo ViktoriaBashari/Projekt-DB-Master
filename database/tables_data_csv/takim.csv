@@ -1,0 +1,21 @@
+﻿Id,DataKrijimit,DataTakimit,DoktorId,InfermierId,PacientId,SherbimId,ShqetesimiKryesor,KohezgjatjaShqetesimit,SimptomaTeLidhura,Konkluzioni ,EshteAnulluar
+1,1/11/2023,2/1/2023,1,20,21,SH006,Dhimbje koke,1 jave ,Asnje ,Ne rregull,0
+2,1/22/2023,2/5/2023,7,13,22,SH002,Lodhje,2 muaj ,Asnje,Ne rregull,0
+3,1/26/2023,7/6/2023,3,19,23,SH001,Temperature,5 dite ,Asnje,Ne rregull,0
+4,2/4/2023,2/6/2023,2,4,24,SH005,Hipertension,2 jave ,Dhimbje koke,Ne rregull,0
+5,1/5/2023,2/7/2023,5,14,25,SH008,Diabet,1 muaj,Asnje,Ne rregull,0
+6,2/16/2024,2/19/2024,12,13,26,SH018,Alergji,1 jave ,Asnje,Ne rregull,0
+7,2/17/2024,2/26/2024,4,9,27,SH017,Probleme me gjumin,2 muaj ,Lodhje,Ne rregull,0
+8,2/28/2024,3/8/2024,10,18,28,SH013,Dhimbje muskujsh,5 dite ,Lodhje,Ne rregull,0
+9,3/9/2024,2/18/2024,1,16,29,SH002,Infeksion,3 dite,Temperature,Ne rregull,0
+10,3/3/2024,3/10/2024,7,20,30,SH017,Stres,4 muaj ,Asnje,Ne rregull,0
+11,3/11/2024,4/11/2024,3,13,31,SH016,Probleme me tretjen,2 jave ,Asnje,Ne rregull,0
+12,3/16/2024,4/12/2024,2,14,32,SH011,Anemi,2 vite,Asnje,Ne rregull,0
+13,3/20/2024,4/13/2024,5,12,33,SH005,Probleme me zemren,1 vit,Hiper tension,Ne rregull,0
+14,3/27/2024,4/14/2024,5,18,34,SH004,Astma,3 vite,Asnje,Ne rregull,0
+15,4/15/2024,5/15/2024,3,14,35,SH002,Semundje tiroide,3 vite,Asnje,Ne rregull,0
+16,5/16/2024,5/16/2024,12,20,36,SH013,Dhimbje mesi,3 jave,Asnje,Ne rregull,1
+17,4/17/2024,5/17/2024,4,19,37,SH001,Marramendje,1 jave ,Asnje,Ne rregull,1
+18,1/22/2025,2/18/2025,10,13,38,SH002,Tension i ulet,2 muaj ,Asnje,Ne rregull,1
+19,1/30/2025,2/19/2025,7,13,39,SH017,Pagjumesi,1 muaj,Asnje,Ne rregull,1
+20,2/20/2025,2/20/2025,1,18,40,SH001,Artrit,4 vite,Asnje,Ne rregull,1
