@@ -79,6 +79,7 @@ GRANT SELECT ON InformacionDepartament TO Administrator;
 
 GRANT SELECT ON InformacionPublikStafi TO Recepsionist, Pacient, Doktor, Infermier;
 GRANT SELECT ON InformacionPersonalStafi TO Doktor, Infermier;
+GRANT SELECT ON InformacionDetajuarStafi TO Administrator;
 
 GRANT SELECT ON InformacionPersonalPacienti TO Pacient;
 GRANT SELECT ON PacientetNenKujdesinAnetaritStafit TO Doktor, Infermier;
