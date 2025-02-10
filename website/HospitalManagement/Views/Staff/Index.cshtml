@@ -1,0 +1,38 @@
+﻿@using HospitalManagement.Models.Data
+@model IList<StaffSummary>
+
+<h1 class="text-primary fw-bold">Stafi</h1>
+
+<table class="table table-hover">
+	<thead>
+		<tr>
+			<th></th>
+			<th>Punonjes ID</th>
+			<th>Emri</th>
+			<th>Data e punesimit</th>
+			<th>Departamenti</th>
+			<th>Roli</th>
+			<th>Specialiteti</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var staff in Model)
+		{
+			<tr>
+				<td>
+					<a asp-action="Details" asp-route-personId="@staff.Id" class="btn btn-outline-secondary">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
+							<path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3" />
+						</svg>
+					</a>
+				</td>
+				<td>@staff.PunonjesId</td>
+				<td>@staff.Emri @staff.Mbiemri</td>
+				<td>@staff.DataPunesimit.ToShortDateString()</td>
+				<td>@staff.DepartamentEmri</td>
+				<td>@staff.Roli</td>
+				<td>@staff.Specialiteti</td>
+			</tr>
+		}
+	</tbody>
+</table>

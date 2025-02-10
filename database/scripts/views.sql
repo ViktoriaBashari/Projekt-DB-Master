@@ -1,6 +1,15 @@
 USE Spitali;
 GO
 
+CREATE OR ALTER VIEW InformacionDepartament AS
+	SELECT 
+   	Departament.Id, Departament.Emri, 
+   	Departament.DrejtuesId, PersonStaf.Emri AS DrejtuesEmri, PersonStaf.Mbiemri as DrejtuesMbiemri
+	FROM Departament
+	LEFT JOIN PersonStaf ON PersonStaf.Id = Departament.DrejtuesId;
+
+GO
+
 CREATE OR ALTER VIEW TakimetRecepsionist AS
 	SELECT Id, DataKrijimit, DataTakimit, DoktorId, InfermierId, PacientId, SherbimId, EshteAnulluar
 	FROM Takim;
@@ -39,14 +48,24 @@ CREATE OR ALTER VIEW InformacionPersonalPacienti AS
 
 GO
 
-CREATE OR ALTER VIEW InformacionPersonalStafi AS
+CREATE OR ALTER VIEW InformacionDetajuarStafi AS
 	SELECT
-		person.Id, person.Emri, person.Mbiemri, person.Datelindja, person.NrTelefoni, gjinia.Emertimi,
-		staf.DepartamentId, staf.RolId, staf.DataPunesimit, staf.Rroga, staf.Specialiteti
-	FROM Staf AS staf
-	INNER JOIN Person AS person ON staf.PersonId = person.Id
-	INNER JOIN Gjinia AS gjinia ON person.GjiniaId = gjinia.Id
-	WHERE staf.PunonjesId = CURRENT_USER;
+		p.Id, p.Emri, p.Mbiemri, p.Datelindja, p.NrTelefoni, gj.Id AS GjiniaId, gj.Emertimi AS GjiniaEmertimi,
+		s.PunonjesId, s.DataPunesimit, s.Rroga, s.Specialiteti,
+		s.RolId, rs.Emertimi AS RolEmertimi,
+		s.DepartamentId, d.Emri AS DepartamentEmri
+	FROM Staf AS s
+	INNER JOIN Person AS p ON s.PersonId = p.Id
+	INNER JOIN Gjinia AS gj ON p.GjiniaId = gj.Id
+	INNER JOIN RolStafi AS rs ON rs.Id = s.RolId
+	INNER JOIN Departament AS d ON d.Id = s.DepartamentId;
+
+GO
+
+CREATE OR ALTER VIEW InformacionPersonalStafi AS
+	SELECT *
+	FROM InformacionDetajuarStafi
+	WHERE PunonjesId = CURRENT_USER;
 
 GO
 

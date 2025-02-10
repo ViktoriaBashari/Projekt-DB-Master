@@ -37,6 +37,7 @@ GRANT UPDATE(DataPagimit, MetodaPagimitId) ON Fature TO Recepsionist;
 
 
 GRANT SELECT(Id, DataKrijimit, DataTakimit, DoktorId, PacientId, SherbimId) ON Takim TO Pacient;
+GRANT SELECT(Id, DataKrijimit, DataTakimit, DoktorId, InfermierId, SherbimId, EshteAnulluar) ON Takim TO Administrator;
 
 GRANT 
 	SELECT, 
@@ -74,8 +75,11 @@ GRANT SELECT, INSERT ON AnamnezaAbuzimit TO Doktor, Infermier;
 GRANT SELECT, INSERT, UPDATE ON PersonPacient TO Recepsionist;
 GRANT SELECT, INSERT, UPDATE ON PersonStaf TO Administrator;
 
+GRANT SELECT ON InformacionDepartament TO Administrator;
+
 GRANT SELECT ON InformacionPublikStafi TO Recepsionist, Pacient, Doktor, Infermier;
 GRANT SELECT ON InformacionPersonalStafi TO Doktor, Infermier;
+GRANT SELECT ON InformacionDetajuarStafi TO Administrator;
 
 GRANT SELECT ON InformacionPersonalPacienti TO Pacient;
 GRANT SELECT ON PacientetNenKujdesinAnetaritStafit TO Doktor, Infermier;
@@ -103,8 +107,10 @@ GRANT SELECT ON dbo.KalkuloTarifenMesatareMujoreTeTrajtimit TO Administrator;
 GRANT EXECUTE ON dbo.GjeneroFluksinRegjistrimeveTePacienteve TO Administrator;
 GRANT EXECUTE ON dbo.GjeneroProceduratMeTePerdorura TO Administrator;
 GRANT EXECUTE ON dbo.GjeneroStafinMeTePerdorur TO Administrator;
-GRANT EXECUTE ON dbo.GjeneroPacientetMeTeShpeshte TO Administrator;
+GRANT EXECUTE ON dbo.GjeneroPacientetMeTeShpeshte TO Recepsionist;
 
 GRANT EXECUTE ON dbo.SelektoTakimetPacientit TO Recepsionist, Pacient;
 GRANT EXECUTE ON dbo.SelektoFaturatPacientit TO Recepsionist, Pacient;
 GRANT EXECUTE ON dbo.SelektoTakimetStafit TO Doktor, Infermier;
+
+GRANT EXECUTE ON dbo.FshiDepartament TO Administrator;

@@ -7,8 +7,9 @@ CREATE OR ALTER PROCEDURE GjeneroFluksinRegjistrimeveTePacienteve
 	@VitiPerfundimtar INT = NULL,
 	@DistributimMujor BIT -- Shto ndarje mujore ne raport
 )
-AS
+AS BEGIN
 	SET NOCOUNT ON;
+
 	SELECT 
 		DATEPART(YEAR, DataRegjistrimit) AS Viti, 
 		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, DataRegjistrimit) END AS Muaji,
@@ -20,6 +21,7 @@ AS
 	GROUP BY 
 		DATEPART(YEAR, DataRegjistrimit), 
 		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, DataRegjistrimit) END;
+END;
 
 GO
 
@@ -28,35 +30,41 @@ CREATE OR ALTER PROCEDURE GjeneroProceduratMeTePerdorura
 	@DistributimMujor BIT, -- Shto ndarje mujore ne raport
 	@VitiPerkates INT = NULL
 )
-AS
+AS BEGIN
 	SET NOCOUNT ON;
+
 	SELECT 
-		DATEPART(YEAR, takim.DataTakimit) AS Viti,
-		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, takim.DataTakimit) END AS Muaji,
+		TOP 10
+		DATEPART(YEAR, Takim.DataTakimit) AS Viti,
+		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, Takim.DataTakimit) END AS Muaji,
 		sherb.Kodi, sherb.Emri, 
-		COUNT(takim.Id) AS NrTakimeve
+		COUNT(Takim.Id) AS NrTakimeve
 	FROM Sherbim AS sherb
-	INNER JOIN Takim AS takim ON takim.SherbimId = sherb.Kodi
+	INNER JOIN Takim ON Takim.SherbimId = sherb.Kodi
 	WHERE
-		takim.EshteAnulluar = 0 AND 
-		(@VitiPerkates IS NULL OR DATEPART(YEAR, takim.DataTakimit) = @VitiPerkates)
+		Takim.EshteAnulluar = 0 AND 
+		(@VitiPerkates IS NULL OR DATEPART(YEAR, Takim.DataTakimit) = @VitiPerkates)
 	GROUP BY 
 		sherb.Kodi,
 		sherb.Emri,
-		DATEPART(YEAR, takim.DataTakimit),
-		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, takim.DataTakimit) END;
+		DATEPART(YEAR, Takim.DataTakimit),
+		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, Takim.DataTakimit) END
+	ORDER BY COUNT(Takim.Id);
+END;
 
 GO
 
 CREATE OR ALTER PROCEDURE GjeneroStafinMeTePerdorur
 (
 	@DistributimMujor BIT, -- Shto ndarje mujore ne raport
-	@RolId INT = NULL,
+	@RolId INT,
 	@VitiPerkates INT = NULL
 )
-AS 
+AS BEGIN 
 	SET NOCOUNT ON;
-	SELECT person.Id, person.Emri, person.Mbiemri, COUNT(takim.Id) AS NrTakimeve
+	SELECT 
+		TOP 10
+		person.Id, person.Emri, person.Mbiemri, COUNT(takim.Id) AS NrTakimeve
 	FROM Takim as takim
 	INNER JOIN Staf AS staf ON staf.PersonId = takim.DoktorId OR staf.PersonId = takim.InfermierId
 	INNER JOIN Person AS person ON person.Id = staf.PersonId
@@ -66,7 +74,9 @@ AS
 		staf.RolId = @RolId
 	GROUP BY 
 		person.Id, person.Emri, person.Mbiemri,
-		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, takim.DataTakimit) END;
+		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, takim.DataTakimit) END
+	ORDER BY COUNT(takim.Id);
+END;
 
 GO
 
@@ -75,9 +85,11 @@ CREATE OR ALTER PROCEDURE GjeneroPacientetMeTeShpeshte
 	@VitiPerkates INT,
 	@MuajiPerkates INT = NULL -- Shto ndarje mujore ne raport
 )
-AS 
+AS BEGIN
 	SET NOCOUNT ON;
-	SELECT person.Id, person.Emri, person.Mbiemri, COUNT(takim.Id) AS NrTakimeve
+	SELECT 
+		TOP 10
+		person.Id, person.Emri, person.Mbiemri, COUNT(takim.Id) AS NrTakimeve
 	FROM Pacient AS pacient
 	INNER JOIN Person AS person ON pacient.PersonId = person.Id
 	INNER JOIN Takim AS takim ON takim.PacientId = pacient.PersonId
@@ -85,7 +97,9 @@ AS
 		takim.EshteAnulluar = 0 AND
 		DATEPART(YEAR, takim.DataTakimit) = @VitiPerkates AND
 		(@MuajiPerkates IS NULL OR DATEPART(MONTH, takim.DataTakimit) = @MuajiPerkates)
-	GROUP BY person.Id, person.Emri, person.Mbiemri;
+	GROUP BY person.Id, person.Emri, person.Mbiemri
+	ORDER BY COUNT(takim.Id);
+END;
 
 GO
 
@@ -95,7 +109,7 @@ CREATE OR ALTER PROCEDURE SelektoTakimetPacientit
 	@DataPerfundimit DATE = NULL,
 	@PacientId INT = NULL
 )
-AS
+AS BEGIN
 	SET NOCOUNT ON;
 
 	IF IS_ROLEMEMBER('Recepsionist', CURRENT_USER) = 1
@@ -121,6 +135,7 @@ AS
 		DataTakimit >= @DataFillimit AND 
 		(@DataPerfundimit IS NULL OR DataTakimit <= @DataPerfundimit)
 	ORDER BY DataTakimit DESC;
+END;
 
 GO
 
@@ -130,7 +145,7 @@ CREATE OR ALTER PROCEDURE SelektoFaturatPacientit
 	@PacientId INT = NULL
 	-- TODO shto parameter per kohen, merr sipas particionimit
 )
-AS
+AS BEGIN
 	SET NOCOUNT ON;
 
 	IF IS_ROLEMEMBER('Recepsionist', CURRENT_USER) = 1
@@ -159,6 +174,7 @@ AS
 			(@FiltroNgaPagesa = 1 AND fature.DataPagimit IS NOT NULL) OR
 			(@FiltroNgaPagesa = 0 AND fature.DataPagimit IS NULL)
 		);
+END;
 
 GO
 
@@ -168,7 +184,7 @@ CREATE OR ALTER PROCEDURE SelektoTakimetStafit
 	@DataPerfundimit DATE = NULL,
 	@StafId INT = NULL
 )
-AS
+AS BEGIN
 	SET NOCOUNT ON;
 	
 	IF IS_ROLEMEMBER('Recepsionist', CURRENT_USER) = 1
@@ -210,5 +226,32 @@ AS
 			DataTakimit >= @DataFillimit AND 
 			(@DataPerfundimit IS NULL OR DataTakimit <= @DataPerfundimit)
 		ORDER BY DataTakimit DESC;
+END;
+
+GO
+
+CREATE OR ALTER PROCEDURE FshiDepartament
+(
+	@DepartamentIdPerFshirje INT,
+	@DepartamentIdZevendesues INT
+)
+AS BEGIN
+	SET NOCOUNT ON;
+
+	BEGIN TRANSACTION FshiDepartamentTrans
+		BEGIN TRY
+			UPDATE Staf 
+			SET DepartamentId = @DepartamentIdZevendesues 
+			WHERE DepartamentId = @DepartamentIdPerFshirje;
+			
+			DELETE FROM Departament WHERE Id = @DepartamentIdPerFshirje;
+
+			COMMIT TRANSACTION FshiDepartamentTrans;
+		END TRY
+
+		BEGIN CATCH
+			ROLLBACK TRANSACTION FshiDepartamentTrans;
+		END CATCH
+END;
 
 GO

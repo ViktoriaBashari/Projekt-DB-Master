@@ -1,0 +1,39 @@
+﻿@using HospitalManagement.Models.Data
+@model Department
+
+<h3 class="text-primary fw-bold">
+	@(Model.Id == 0 ? "Shto" : "Perditeso") departament
+</h3>
+
+<form asp-action="Upsert" method="post">
+	<input type="hidden" asp-for="Id" value="@Model.Id" />
+
+	<div class="form-floating mb-3">
+		<input type="text" asp-for="Emri" class="form-control" value="@Model.Emri" />
+		<label asp-for="Emri"></label>
+		<span asp-validation-for="Emri" class="text-danger"></span>
+	</div>
+
+	<div class="mb-3">
+		<label asp-for="DrejtuesId" class="form-label">Drejtuesi</label>
+		<select asp-for="DrejtuesId" class="form-select">
+			<option value="" selected="@(!Model.DrejtuesId.HasValue)">N/A</option>
+
+			@if (Model.DrejtuesId.HasValue)
+			{
+				<option selected value="@Model.DrejtuesId">@Model.DrejtuesEmri @Model.DrejtuesMbiemri</option>
+			}
+
+			@foreach ((int PersonId, string Emri, string Mbiemri) leader in ViewBag.LeaderPossibilities)
+			{
+				<option selected="@(leader.PersonId == Model.DrejtuesId)" value="@leader.PersonId">
+					@leader.Emri @leader.Mbiemri
+				</option>
+			}
+		</select>
+		<span asp-validation-for="DrejtuesId" class="text-danger"></span>
+	</div>
+
+	<input type="submit" class="btn btn-primary" value="Ruaj" />
+	<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+</form>

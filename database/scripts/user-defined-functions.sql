@@ -1,6 +1,92 @@
 USE Spitali;
 GO
 
+CREATE OR ALTER FUNCTION EshtePacientiNenKujdesinAnetaritStafit
+(
+	@PacientId INT, 
+	@StafPunonjesId CHAR(5)
+)
+RETURNS BIT
+AS BEGIN
+	IF EXISTS (
+		SELECT 1 
+		FROM Takim AS takim
+		INNER JOIN Staf AS doc ON takim.DoktorId = doc.PersonId
+		INNER JOIN Staf AS inf ON takim.InfermierId = inf.PersonId
+		WHERE 
+			takim.EshteAnulluar = 0 AND 
+			takim.PacientId = @PacientId AND 
+			(doc.PunonjesId = @StafPunonjesId OR inf.PunonjesId = @StafPunonjesId))
+		RETURN 1;
+	
+	RETURN 0;
+END;
+
+GO
+
+CREATE TYPE UpsertedTakimType AS TABLE(DoktorId INT NOT NULL, InfermierId INT NULL, DataTakimit DATETIME);
+GO
+
+CREATE OR ALTER FUNCTION JaneTakimetBrendaOrarit(@Takimet UpsertedTakimType READONLY) 
+RETURNS BIT
+AS BEGIN
+	-- Kontrollo nese takimet jane brenda orarit te doktorit
+	IF EXISTS(
+		SELECT *
+		FROM @Takimet AS i
+		INNER JOIN OrariPloteStafit as orari on 
+			orari.StafId = i.DoktorId AND
+			(
+				(CAST(i.DataTakimit AS TIME) not between orari.OraFilluese and orari.OraPerfundimtare) or
+				DitaId != DATEPART(dw, i.DataTakimit)
+			))
+		RETURN 0;
+
+	-- Kontrollo nese takimet jane brenda orarit te infermierit
+	IF EXISTS(
+		SELECT 1
+		FROM @Takimet AS i
+		INNER JOIN OrariPloteStafit as orari on 
+			orari.StafId = i.InfermierId AND
+			(
+				(CAST(i.DataTakimit AS TIME) not between orari.OraFilluese and orari.OraPerfundimtare) or
+				DitaId != DATEPART(dw, i.DataTakimit)
+			))
+		RETURN 0;
+
+	RETURN 1;
+END;
+
+GO
+
+CREATE OR ALTER FUNCTION ShkaktojneKonfliktOrariTakimet(@Takimet UpsertedTakimType READONLY) 
+RETURNS BIT
+AS BEGIN
+	-- Kontrollo nese takimi bie ne konflikt me takime te tjera ne orarin e doktorit
+	IF EXISTS(
+		SELECT *
+		FROM @Takimet AS i
+		INNER JOIN Takim ON i.DoktorId = Takim.DoktorId
+		WHERE i.DataTakimit BETWEEN i.DataTakimit AND DATEADD(MINUTE, 90, i.DataTakimit)
+		GROUP BY i.DoktorId
+		HAVING COUNT(*) > 1)
+		RETURN 1;
+
+	-- Kontrollo nese takimi bie ne konflikt me takime te tjera ne orarin e doktorit
+	IF EXISTS(
+		SELECT 1
+		FROM @Takimet AS i
+		INNER JOIN Takim ON i.InfermierId = Takim.InfermierId
+		WHERE i.DataTakimit BETWEEN i.DataTakimit AND DATEADD(MINUTE, 90, i.DataTakimit)
+		GROUP BY i.InfermierId
+		HAVING COUNT(*) > 1)
+		RETURN 1;
+
+	RETURN 0;
+END;
+
+GO
+
 CREATE OR ALTER FUNCTION MerrOrarinStafitPerkates(@StafPersonId INT)
 RETURNS TABLE
 AS RETURN
@@ -28,39 +114,19 @@ END;
 
 GO
 
-CREATE OR ALTER FUNCTION EshtePacientiNenKujdesinAnetaritStafit
-(
-	@PacientId INT, 
-	@StafPunonjesId CHAR(5)
-)
-RETURNS BIT
-AS BEGIN
-	IF EXISTS (
-		SELECT 1 
-		FROM Takim AS takim
-		INNER JOIN Staf AS doc ON takim.DoktorId = doc.PersonId
-		INNER JOIN Staf AS inf ON takim.InfermierId = inf.PersonId
-		WHERE 
-			takim.EshteAnulluar = 0 AND 
-			takim.PacientId = @PacientId AND 
-			(doc.PunonjesId = @StafPunonjesId OR inf.PunonjesId = @StafPunonjesId))
-		RETURN 1;
-	
-	RETURN 0;
-END;
-
-GO
-
 CREATE OR ALTER FUNCTION GjeneroRaportinStafKerkese()
 RETURNS DECIMAL
 AS BEGIN
 	DECLARE @nrStafit INT, @nrPacienteve INT;
 
-	SELECT @nrStafit = COUNT(PersonId)
-	FROM Staf;
-
 	SELECT @nrPacienteve = COUNT(PersonId)
 	FROM Pacient;
+
+	IF @nrPacienteve = 0
+		RETURN 0;
+
+	SELECT @nrStafit = COUNT(PersonId)
+	FROM Staf;
 
 	RETURN @nrStafit / @nrPacienteve;
 END;
@@ -74,6 +140,9 @@ AS BEGIN
 	
 	SELECT @nrPacienteve = COUNT(PersonId)
 	FROM Pacient;
+
+	IF @nrPacienteve = 0
+		RETURN 0;
 
 	SELECT @kohaTotalePritjes = SUM(DATEDIFF(MINUTE, DataKrijimit, DataTakimit))
 	FROM Takim;
@@ -90,6 +159,9 @@ CREATE OR ALTER FUNCTION KalkuloPerqindjenTakimeveAnulluara
 )
 RETURNS DECIMAL
 AS BEGIN
+	IF @DataFillimtare > @DataPerfundimtare
+		RETURN CAST('Data fillimtare duhet te jete me e vogel se ajo perfundimtare' AS INT);
+	
 	DECLARE @nrTotalTakimeve INT, @nrTakimeveAnulluara INT;
 
 	SELECT @nrTotalTakimeve = COUNT(Id)
@@ -97,6 +169,9 @@ AS BEGIN
 	WHERE 
 		(@DataFillimtare IS NULL OR DataTakimit >= @DataFillimtare) AND
 		(@DataPerfundimtare IS NULL OR DataTakimit <= @DataPerfundimtare);
+
+	IF @nrTotalTakimeve = 0
+		RETURN 0;
 
 	SELECT @nrTakimeveAnulluara = COUNT(Id)
 	FROM Takim
@@ -160,7 +235,7 @@ AS BEGIN
 	SELECT @fitimet = FitimeFature
 	FROM GjeneroRaportFitimesh(@VitiPerkates, @VitiPerkates, 0);
 
-	RETURN (@fitimet - @shpenzimet) / @fitimet;
+	RETURN IIF(@fitimet = 0, 0, (@fitimet - @shpenzimet) / @fitimet);
 END;
 
 GO
@@ -174,9 +249,6 @@ RETURNS DECIMAL
 AS BEGIN
 	DECLARE @fitimetSherbimeve DECIMAL, @nrTrajtimeve INT;
 
-	SELECT @fitimetSherbimeve = FitimeFature
-	FROM GjeneroRaportFitimesh(@VitiFillimtar, @VitiPerfundimtar, 0);
-
 	SELECT @nrTrajtimeve = COUNT(Id)
 	FROM Takim
 	WHERE 
@@ -184,6 +256,12 @@ AS BEGIN
 		DataTakimit < GETDATE() AND
 		(@VitiFillimtar IS NULL OR DATEPART(YEAR, DataTakimit) >= @VitiFillimtar) AND
 		(@VitiPerfundimtar IS NULL OR DATEPART(YEAR, DataTakimit) <= @VitiPerfundimtar);
+
+	IF @nrTrajtimeve = 0
+		RETURN 0;
+
+	SELECT @fitimetSherbimeve = FitimeFature
+	FROM GjeneroRaportFitimesh(@VitiFillimtar, @VitiPerfundimtar, 0);
 
 	RETURN @fitimetSherbimeve / @nrTrajtimeve;
 END;
@@ -213,7 +291,9 @@ AS BEGIN
 	SELECT * FROM GjeneroRaportFitimesh(@VitiFillimtar, @VitiPerfundimtar, 1);
 
 	INSERT INTO @rezultati 
-	SELECT nrTakimeve.Viti, nrTakimeve.Muaji, (FitimeFature / NrTakimeve) AS TarifaMesatareTrajtimit
+	SELECT 
+		nrTakimeve.Viti, nrTakimeve.Muaji, 
+		IIF(NrTakimeve = 0, 0, FitimeFature / NrTakimeve) AS TarifaMesatareTrajtimit
 	FROM @tabelaAgregatesMujoreTeTakimeve AS nrTakimeve
 	INNER JOIN @tabelaFitimeveMujoreNgaSherbimet AS fitimet ON nrTakimeve.Viti = fitimet.Viti AND nrTakimeve.Muaji = fitimet.Muaji;
 

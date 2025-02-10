@@ -1,0 +1,37 @@
+﻿@using HospitalManagement.Models.ViewModels
+@model UpsertTreatmentVM
+
+<h3 class="text-primary fw-bold">
+	@(Model.TreatmentToBeUpdatedCode == null ? "Shto" : "Perditeso") sherbim
+</h3>
+
+<form asp-action="Upsert" method="post">
+	<input type="hidden" asp-for="TreatmentToBeUpdatedCode" value="@Model.TreatmentToBeUpdatedCode" />
+
+	<div class="form-floating mb-3">
+		<input type="text" asp-for="Treatment.Kodi" class="form-control" value="@Model.Treatment.Kodi" />
+		<label asp-for="Treatment.Kodi"></label>
+		<span asp-validation-for="Treatment.Kodi" class="text-danger"></span>
+	</div>
+
+	<div class="form-floating mb-3">
+		<input type="text" asp-for="Treatment.Emri" class="form-control" value="@Model.Treatment.Emri" />
+		<label asp-for="Treatment.Emri"></label>
+		<span asp-validation-for="Treatment.Emri" class="text-danger"></span>
+	</div>
+
+	<div class="form-floating mb-3">
+		<textarea type="text" asp-for="Treatment.Pershkrimi" class="form-control"></textarea>
+		<label asp-for="Treatment.Pershkrimi"></label>
+		<span asp-validation-for="Treatment.Pershkrimi" class="text-danger"></span>
+	</div>
+
+	<div class="form-floating mb-3">
+		<input type="number" step="any" asp-for="Treatment.Cmimi" class="form-control" value="@Model.Treatment.Cmimi" />
+		<label asp-for="Treatment.Cmimi"></label>
+		<span asp-validation-for="Treatment.Cmimi" class="text-danger"></span>
+	</div>
+
+	<input type="submit" class="btn btn-primary" value="Ruaj" />
+	<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+</form>
