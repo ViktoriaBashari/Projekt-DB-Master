@@ -157,6 +157,28 @@ AS BEGIN
 			ROLLBACK TRANSACTION;
 		END
 
+	IF EXISTS(
+		SELECT 1 
+		FROM Staf AS s
+		INNER JOIN RolStafi AS rs ON rs.Id = s.PersonId
+		INNER JOIN INSERTED AS i ON i.DoktorId = s.PersonId
+		WHERE rs.Emertimi != 'Doktor')
+		BEGIN
+			RAISERROR('Doktori i percaktuar nuk eshte doktor', 16, -1);
+			ROLLBACK TRANSACTION;
+		END
+
+	IF EXISTS(
+		SELECT 1 
+		FROM Staf AS s
+		INNER JOIN RolStafi AS rs ON rs.Id = s.PersonId
+		INNER JOIN INSERTED AS i ON i.Infermier = s.PersonId
+		WHERE rs.Emertimi != 'Infermier')
+		BEGIN
+			RAISERROR('Infermieri i percaktuar nuk eshte infermier', 16, -1);
+			ROLLBACK TRANSACTION;
+		END
+
 	DECLARE @takimet UpsertedTakimType;
 	
 	INSERT INTO @takimet
