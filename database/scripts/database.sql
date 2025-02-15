@@ -23,22 +23,22 @@ GO
 
 CREATE TABLE Gjinia (
     Id TINYINT NOT NULL PRIMARY KEY,
-    Emertimi CHAR(8) NOT NULL
+    Emertimi CHAR(8) UNIQUE NOT NULL
 );
 
 CREATE TABLE DiteJave (
     Id TINYINT NOT NULL PRIMARY KEY,
-    Emertimi CHAR(7) NOT NULL
+    Emertimi CHAR(7) UNIQUE NOT NULL
 );
 
 CREATE TABLE MetodePagimi (
     Id TINYINT NOT NULL PRIMARY KEY,
-    Emertimi CHAR(7) NOT NULL
+    Emertimi CHAR(7) UNIQUE NOT NULL
 );
 
 CREATE TABLE RolStafi (
     Id TINYINT NOT NULL PRIMARY KEY,
-    Emertimi CHAR(12) NOT NULL
+    Emertimi CHAR(12) UNIQUE NOT NULL
 );
 
 GO
@@ -70,18 +70,14 @@ GO
 CREATE TABLE Departament (
     Id INT NOT NULL IDENTITY PRIMARY KEY,
     DrejtuesId INT NULL,
-    Emri VARCHAR(50) NOT NULL,
-
-	CONSTRAINT EmerUnikDepartamenti UNIQUE(Emri),
+    Emri VARCHAR(50) UNIQUE NOT NULL
 );
 
 CREATE TABLE Sherbim (
     Kodi CHAR(5) NOT NULL PRIMARY KEY,
-    Emri VARCHAR(55) NOT NULL,
+    Emri VARCHAR(55) UNIQUE NOT NULL,
     Pershkrimi VARCHAR(300) NULL,
-    Cmimi DECIMAL(20,2) NOT NULL,
-
-	CONSTRAINT EmerUnikSherbimi UNIQUE(Emri),
+    Cmimi DECIMAL(20,2) NOT NULL
 );
 
 
@@ -106,12 +102,11 @@ CREATE TABLE Pacient (
 		FOREIGN KEY REFERENCES Person(Id)
 		ON DELETE NO ACTION
 		ON UPDATE CASCADE,
-    NID CHAR(10) NOT NULL,
+    NID CHAR(10) UNIQUE NOT NULL,
     DataRegjistrimit DATE NOT NULL DEFAULT GETDATE(),
     GrupiGjakut CHAR(3) NULL,
 
 	PRIMARY KEY (PersonId),
-	CONSTRAINT NIDUnik UNIQUE(NID),
 	CONSTRAINT VleratGrupitGjakut CHECK 
 		(GrupiGjakut IN ('A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-')),
 );
@@ -137,7 +132,7 @@ CREATE TABLE Staf (
 		FOREIGN KEY REFERENCES Person(Id)
 		ON DELETE NO ACTION
 		ON UPDATE CASCADE,
-	PunonjesId CHAR(5) NOT NULL,
+	PunonjesId CHAR(5) UNIQUE NOT NULL,
     DepartamentId INT NOT NULL 
 		FOREIGN KEY REFERENCES Departament(Id)
 		ON DELETE NO ACTION
@@ -150,8 +145,7 @@ CREATE TABLE Staf (
     Rroga DECIMAL(15,4) NOT NULL,
     Specialiteti VARCHAR(50) NULL,
 
-	PRIMARY KEY (PersonId),
-	CONSTRAINT PunonjesIdUnik UNIQUE(PunonjesId),
+	PRIMARY KEY (PersonId)
 );
 
 CREATE INDEX DepartamentStafi ON Staf (DepartamentId);
@@ -220,14 +214,13 @@ CREATE TABLE Fature (
 	PRIMARY KEY (TakimId),
 );
 
-CREATE INDEX TakimFature ON Fature (TakimId);
 CREATE INDEX MetodaPagimitFatures ON Fature (MetodaPagimitId);
 
 GO
 
 CREATE TABLE TurnOrari (
     Id INT NOT NULL IDENTITY PRIMARY KEY,
-    Emri VARCHAR(55) NOT NULL,
+    Emri VARCHAR(55) UNIQUE NOT NULL,
     OraFilluese TIME NOT NULL,
     OraPerfundimtare TIME NOT NULL,
 
@@ -249,9 +242,6 @@ CREATE TABLE Orar (
     PRIMARY KEY (TurnOrarId, StafId),
 );
 
-CREATE INDEX TurnPerOrarin ON Orar (TurnOrarId);
-CREATE INDEX StafiOrarit ON Orar (StafId);
-
 GO
 
 CREATE TABLE DiteTurni (
@@ -266,9 +256,6 @@ CREATE TABLE DiteTurni (
 
     PRIMARY KEY (TurnOrarId, DiteJaveId),
 );
-
-CREATE INDEX TurniDites ON DiteTurni (TurnOrarId);
-CREATE INDEX DitePerTurnin ON DiteTurni (DiteJaveId);
 
 GO
 
@@ -309,7 +296,7 @@ CREATE TABLE AnamnezaFamiljare (
 		ON DELETE NO ACTION
 		ON UPDATE NO ACTION,
     LidhjaFamiljare VARCHAR(50) NOT NULL,
-    Datelindja DATE NOT NULL,
+    Datelindja DATE NOT NULL CHECK (Datelindja <= GETDATE()),
     Semundja VARCHAR(50) NOT NULL,
     MoshaDiagnozes TINYINT NULL,
     ShkakuVdekjes VARCHAR(80) NULL,
@@ -332,7 +319,7 @@ CREATE TABLE AnamnezaSemundjes (
 		ON DELETE NO ACTION
 		ON UPDATE NO ACTION,
     Semundja VARCHAR(50) NOT NULL,
-    DataDiagnozes DATE NOT NULL,
+    DataDiagnozes DATE NOT NULL CHECK (DataDiagnozes <= GETDATE()),
     EshteKronike BIT NOT NULL,
 );
 
@@ -354,7 +341,8 @@ CREATE TABLE AnamnezaAbuzimit (
     Substanca VARCHAR(50) NOT NULL,
     Pershkrimi VARCHAR(MAX) NULL,
     DataFillimit DATE NOT NULL,
-    DataPerfundimit DATE NULL CHECK (DataPerfundimit > DataFillimit),
+    DataPerfundimit DATE NULL,
+	CHECK (DataPerfundimit IS NULL OR DataPerfundimit >= DataFillimit),
 );
 
 CREATE INDEX AnamnezaAbuzimit_Pacient ON AnamnezaAbuzimit (PacientId);
@@ -376,8 +364,9 @@ CREATE TABLE AnamnezaFarmakologjike (
     Doza VARCHAR(40) NOT NULL,
     Arsyeja VARCHAR(200) NOT NULL,
     DataFillimit DATE NOT NULL,
-    DataPerfundimit DATE NULL CHECK (DataPerfundimit > DataFillimit),
+    DataPerfundimit DATE NULL,
     MarrePaRecete BIT NOT NULL,
+	CHECK (DataPerfundimit IS NULL OR DataPerfundimit >= DataFillimit),
 );
 
 CREATE INDEX AnamnezaFarmakologjike_Pacient ON AnamnezaFarmakologjike (PacientId);

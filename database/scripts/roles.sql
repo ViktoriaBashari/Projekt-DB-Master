@@ -2,10 +2,29 @@ USE Spitali;
 GO
 
 -- Role
-CREATE ROLE Pacient;
+IF NOT EXISTS (
+    SELECT 1 FROM sys.database_principals 
+    WHERE name = 'Pacient' AND type = 'R')
+	CREATE ROLE Pacient;
+
+IF NOT EXISTS (
+	SELECT 1 FROM sys.database_principals 
+	WHERE name = 'Doktor' AND type = 'R')
 CREATE ROLE Doktor;
+
+IF NOT EXISTS (
+    SELECT 1 FROM sys.database_principals 
+    WHERE name = 'Infermier' AND type = 'R')
 CREATE ROLE Infermier;
+
+IF NOT EXISTS (
+    SELECT 1 FROM sys.database_principals 
+    WHERE name = 'Recepsionist' AND type = 'R')
 CREATE ROLE Recepsionist;
+
+IF NOT EXISTS (
+    SELECT 1 FROM sys.database_principals 
+    WHERE name = 'Administrator' AND type = 'R')
 CREATE ROLE Administrator;
 
 GO
@@ -114,3 +133,6 @@ GRANT EXECUTE ON dbo.SelektoFaturatPacientit TO Recepsionist, Pacient;
 GRANT EXECUTE ON dbo.SelektoTakimetStafit TO Doktor, Infermier;
 
 GRANT EXECUTE ON dbo.FshiDepartament TO Administrator;
+
+GRANT EXECUTE ON dbo.ShtoStafAdministratues TO Administrator;
+GRANT EXECUTE ON dbo.FshiStafAdministratues TO Administrator;

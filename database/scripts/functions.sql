@@ -24,10 +24,7 @@ END;
 
 GO
 
-IF NOT EXISTS(
-	SELECT 1 FROM sys.types WHERE is_table_type = 1 AND name = 'UpsertedTakimType')
-	CREATE TYPE UpsertedTakimType AS TABLE(DoktorId INT NOT NULL, InfermierId INT NULL, DataTakimit DATETIME);
-
+CREATE TYPE UpsertedTakimType AS TABLE(DoktorId INT NOT NULL, InfermierId INT NULL, DataTakimit DATETIME);
 GO
 
 CREATE OR ALTER FUNCTION JaneTakimetBrendaOrarit(@Takimet UpsertedTakimType READONLY) 

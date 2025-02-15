@@ -5,13 +5,16 @@ CREATE OR ALTER TRIGGER ValidoDrejtuesinDepartamentit
 ON Departament
 AFTER INSERT, UPDATE
 AS BEGIN
+	IF EXISTS(SELECT 1 FROM DELETED) AND NOT UPDATE(DrejtuesId)
+		RETURN;
+
 	-- Siguro qe drejtuesi eshte doktor
 	IF EXISTS (
 		SELECT 1
 		FROM INSERTED as i
 		INNER JOIN Staf ON i.DrejtuesId = Staf.PersonId
 		INNER JOIN RolStafi ON RolStafi.Id = Staf.RolId
-		WHERE RolStafi.Emertimi = 'Infermier')
+		WHERE RolStafi.Emertimi != 'Doktor')
 		BEGIN
 			RAISERROR('Drejtuesit duhet te jene doktore', 16, -1);
 			ROLLBACK TRANSACTION;
@@ -24,23 +27,17 @@ CREATE OR ALTER TRIGGER ShtoAnamnezeFamiljare
 ON AnamnezaFamiljare
 INSTEAD OF INSERT
 AS BEGIN
-	IF IS_ROLEMEMBER('Doktor', CURRENT_USER) = 1 OR IS_ROLEMEMBER('Infermier', CURRENT_USER) = 1
-	BEGIN 
-		IF EXISTS(
-			SELECT 1
-			FROM inserted AS i
-			WHERE dbo.EshtePacientiNenKujdesinAnetaritStafit(i.PacientId, CURRENT_USER) = 0)
-			THROW 401, 'Veprim i paautorizuar', 1;
+	-- Valido qe shtimi po kryhet nga kujdestaret primare te pacientit
+	IF EXISTS(
+		SELECT 1
+		FROM inserted AS i
+		WHERE dbo.EshtePacientiNenKujdesinAnetaritStafit(i.PacientId, CURRENT_USER) = 0)
+		THROW 401, 'Veprim i paautorizuar', 1;
 
-		INSERT INTO AnamnezaFamiljare(PacientId, StafiPergjegjesId, LidhjaFamiljare, Datelindja, Semundja, MoshaDiagnozes, ShkakuVdekjes, DataVdekjes)
-		SELECT i.PacientId, staf.PersonId, i.LidhjaFamiljare, i.Datelindja, i.Semundja, i.MoshaDiagnozes, i.ShkakuVdekjes, i.DataVdekjes
-		FROM INSERTED i
-		INNER JOIN Staf AS staf ON staf.PunonjesId = CURRENT_USER;
-	END
-	ELSE
-		INSERT INTO AnamnezaFamiljare(PacientId, StafiPergjegjesId, LidhjaFamiljare, Datelindja, Semundja, MoshaDiagnozes, ShkakuVdekjes, DataVdekjes)
-		SELECT PacientId, StafiPergjegjesId, LidhjaFamiljare, Datelindja, Semundja, MoshaDiagnozes, ShkakuVdekjes, DataVdekjes
-		FROM INSERTED;
+	INSERT INTO AnamnezaFamiljare(PacientId, StafiPergjegjesId, LidhjaFamiljare, Datelindja, Semundja, MoshaDiagnozes, ShkakuVdekjes, DataVdekjes)
+	SELECT i.PacientId, staf.PersonId, i.LidhjaFamiljare, i.Datelindja, i.Semundja, i.MoshaDiagnozes, i.ShkakuVdekjes, i.DataVdekjes
+	FROM INSERTED i
+	INNER JOIN Staf AS staf ON staf.PunonjesId = CURRENT_USER;
 END;
 
 GO
@@ -49,23 +46,17 @@ CREATE OR ALTER TRIGGER ShtoAnamnezeFiziologjike
 ON AnamnezaFiziologjike
 INSTEAD OF INSERT
 AS BEGIN
-	IF IS_ROLEMEMBER('Doktor', CURRENT_USER) = 1 OR IS_ROLEMEMBER('Infermier', CURRENT_USER) = 1
-	BEGIN 
-		IF EXISTS(
-			SELECT 1
-			FROM inserted AS i
-			WHERE dbo.EshtePacientiNenKujdesinAnetaritStafit(i.PacientId, CURRENT_USER) = 0)
-			THROW 401, 'Veprim i paautorizuar', 1;
+	-- Valido qe shtimi po kryhet nga kujdestaret primare te pacientit
+	IF EXISTS(
+		SELECT 1
+		FROM inserted AS i
+		WHERE dbo.EshtePacientiNenKujdesinAnetaritStafit(i.PacientId, CURRENT_USER) = 0)
+		THROW 401, 'Veprim i paautorizuar', 1;
 
-		INSERT INTO AnamnezaFiziologjike(PacientId, StafiPergjegjesId, SistemiFrymemarrjes, SistemiGjenitourinar, SistemiTretes, SistemiOkular, SistemiNeurologjik, SistemiORL, SistemiKardiovaskular)
-		SELECT i.PacientId, staf.PersonId, i.SistemiFrymemarrjes, i.SistemiGjenitourinar, i.SistemiTretes, i.SistemiOkular, i.SistemiNeurologjik, i.SistemiORL, i.SistemiKardiovaskular
-		FROM INSERTED i
-		INNER JOIN Staf AS staf ON staf.PunonjesId = CURRENT_USER
-	END
-	ELSE
-		INSERT INTO AnamnezaFiziologjike(PacientId, StafiPergjegjesId, SistemiFrymemarrjes, SistemiGjenitourinar, SistemiTretes, SistemiOkular, SistemiNeurologjik, SistemiORL, SistemiKardiovaskular)
-		SELECT PacientId, StafiPergjegjesId, SistemiFrymemarrjes, SistemiGjenitourinar, SistemiTretes, SistemiOkular, SistemiNeurologjik, SistemiORL, SistemiKardiovaskular
-		FROM INSERTED;
+	INSERT INTO AnamnezaFiziologjike(PacientId, StafiPergjegjesId, SistemiFrymemarrjes, SistemiGjenitourinar, SistemiTretes, SistemiOkular, SistemiNeurologjik, SistemiORL, SistemiKardiovaskular)
+	SELECT i.PacientId, staf.PersonId, i.SistemiFrymemarrjes, i.SistemiGjenitourinar, i.SistemiTretes, i.SistemiOkular, i.SistemiNeurologjik, i.SistemiORL, i.SistemiKardiovaskular
+	FROM INSERTED i
+	INNER JOIN Staf AS staf ON staf.PunonjesId = CURRENT_USER;
 END;
 
 GO
@@ -73,24 +64,18 @@ GO
 CREATE OR ALTER TRIGGER ShtoAnamnezeSemundjeje
 ON AnamnezaSemundjes
 INSTEAD OF INSERT
-AS BEGIN
-	IF IS_ROLEMEMBER('Doktor', CURRENT_USER) = 1 OR IS_ROLEMEMBER('Infermier', CURRENT_USER) = 1
-	BEGIN 
-		IF EXISTS(
-			SELECT 1
-			FROM inserted AS i
-			WHERE dbo.EshtePacientiNenKujdesinAnetaritStafit(i.PacientId, CURRENT_USER) = 0)
-			THROW 401, 'Veprim i paautorizuar', 1;
+AS BEGIN	
+	-- Valido qe shtimi po kryhet nga kujdestaret primare te pacientit
+	IF EXISTS(
+		SELECT 1
+		FROM inserted AS i
+		WHERE dbo.EshtePacientiNenKujdesinAnetaritStafit(i.PacientId, CURRENT_USER) = 0)
+		THROW 401, 'Veprim i paautorizuar', 1;
 
-		INSERT INTO AnamnezaSemundjes(PacientId, StafiPergjegjesId, Semundja, DataDiagnozes, EshteKronike)
-		SELECT i.PacientId, staf.PersonId, i.Semundja, i.DataDiagnozes, i.EshteKronike
-		FROM INSERTED i
-		INNER JOIN Staf AS staf ON staf.PunonjesId = CURRENT_USER;
-	END
-	ELSE
-		INSERT INTO AnamnezaSemundjes(PacientId, StafiPergjegjesId, Semundja, DataDiagnozes, EshteKronike)
-		SELECT PacientId, StafiPergjegjesId, Semundja, DataDiagnozes, EshteKronike
-		FROM INSERTED;
+	INSERT INTO AnamnezaSemundjes(PacientId, StafiPergjegjesId, Semundja, DataDiagnozes, EshteKronike)
+	SELECT i.PacientId, staf.PersonId, i.Semundja, i.DataDiagnozes, i.EshteKronike
+	FROM INSERTED i
+	INNER JOIN Staf AS staf ON staf.PunonjesId = CURRENT_USER;
 END;
 
 GO
@@ -99,23 +84,17 @@ CREATE OR ALTER TRIGGER ShtoAnamnezeAbuzimi
 ON AnamnezaAbuzimit
 INSTEAD OF INSERT
 AS BEGIN
-	IF IS_ROLEMEMBER('Doktor', CURRENT_USER) = 1 OR IS_ROLEMEMBER('Infermier', CURRENT_USER) = 1
-	BEGIN 
-		IF EXISTS(
-			SELECT 1
-			FROM inserted AS i
-			WHERE dbo.EshtePacientiNenKujdesinAnetaritStafit(i.PacientId, CURRENT_USER) = 0)
-			THROW 401, 'Veprim i paautorizuar', 1;
+	-- Valido qe shtimi po kryhet nga kujdestaret primare te pacientit
+	IF EXISTS(
+		SELECT 1
+		FROM inserted AS i
+		WHERE dbo.EshtePacientiNenKujdesinAnetaritStafit(i.PacientId, CURRENT_USER) = 0)
+		THROW 401, 'Veprim i paautorizuar', 1;
 
-		INSERT INTO AnamnezaAbuzimit(PacientId, StafiPergjegjesId, Substanca, Pershkrimi, DataFillimit, DataPerfundimit)
-		SELECT i.PacientId, staf.PersonId, i.Substanca, i.Pershkrimi, i.DataFillimit, i.DataPerfundimit
-		FROM INSERTED i
-		INNER JOIN Staf AS staf ON staf.PunonjesId = CURRENT_USER;
-	END
-	ELSE
-		INSERT INTO AnamnezaAbuzimit(PacientId, StafiPergjegjesId, Substanca, Pershkrimi, DataFillimit, DataPerfundimit)
-		SELECT PacientId, StafiPergjegjesId, Substanca, Pershkrimi, DataFillimit, DataPerfundimit
-		FROM INSERTED;
+	INSERT INTO AnamnezaAbuzimit(PacientId, StafiPergjegjesId, Substanca, Pershkrimi, DataFillimit, DataPerfundimit)
+	SELECT i.PacientId, staf.PersonId, i.Substanca, i.Pershkrimi, i.DataFillimit, i.DataPerfundimit
+	FROM INSERTED i
+	INNER JOIN Staf AS staf ON staf.PunonjesId = CURRENT_USER;
 END;
 
 GO
@@ -124,23 +103,17 @@ CREATE OR ALTER TRIGGER ShtoAnamnezeFarmakologjike
 ON AnamnezaFarmakologjike
 INSTEAD OF INSERT
 AS BEGIN
-	IF IS_ROLEMEMBER('Doktor', CURRENT_USER) = 1 OR IS_ROLEMEMBER('Infermier', CURRENT_USER) = 1
-	BEGIN 
-		IF EXISTS(
-			SELECT 1
-			FROM inserted AS i
-			WHERE dbo.EshtePacientiNenKujdesinAnetaritStafit(i.PacientId, CURRENT_USER) = 0)
-			THROW 401, 'Veprim i paautorizuar', 1;
+	-- Valido qe shtimi po kryhet nga kujdestaret primare te pacientit
+	IF EXISTS(
+		SELECT 1
+		FROM inserted AS i
+		WHERE dbo.EshtePacientiNenKujdesinAnetaritStafit(i.PacientId, CURRENT_USER) = 0)
+		THROW 401, 'Veprim i paautorizuar', 1;
 
-		INSERT INTO AnamnezaFarmakologjike(PacientId, StafiPergjegjesId, Ilaci, Doza, Arsyeja, DataFillimit, DataPerfundimit, MarrePaRecete)
-		SELECT i.PacientId, staf.PersonId, i.Ilaci, i.Doza, i.Arsyeja, i.DataFillimit, i.DataPerfundimit, i.MarrePaRecete
-		FROM INSERTED i
-		INNER JOIN Staf AS staf ON staf.PunonjesId = CURRENT_USER;
-	END
-	ELSE
-		INSERT INTO AnamnezaFarmakologjike(PacientId, StafiPergjegjesId, Ilaci, Doza, Arsyeja, DataFillimit, DataPerfundimit, MarrePaRecete)
-		SELECT PacientId, StafiPergjegjesId, Ilaci, Doza, Arsyeja, DataFillimit, DataPerfundimit, MarrePaRecete
-		FROM INSERTED;
+	INSERT INTO AnamnezaFarmakologjike(PacientId, StafiPergjegjesId, Ilaci, Doza, Arsyeja, DataFillimit, DataPerfundimit, MarrePaRecete)
+	SELECT i.PacientId, staf.PersonId, i.Ilaci, i.Doza, i.Arsyeja, i.DataFillimit, i.DataPerfundimit, i.MarrePaRecete
+	FROM INSERTED i
+	INNER JOIN Staf AS staf ON staf.PunonjesId = CURRENT_USER;
 END;
 
 GO
@@ -159,10 +132,9 @@ AS BEGIN
 
 	IF EXISTS(
 		SELECT 1 
-		FROM Staf AS s
-		INNER JOIN RolStafi AS rs ON rs.Id = s.PersonId
-		INNER JOIN INSERTED AS i ON i.DoktorId = s.PersonId
-		WHERE rs.Emertimi != 'Doktor')
+		FROM INSERTED AS i
+		INNER JOIN Staf ON i.DoktorId = Staf.PersonId
+		INNER JOIN RolStafi AS rs ON rs.Id = Staf.RolId AND rs.Emertimi != 'Doktor')
 		BEGIN
 			RAISERROR('Doktori i percaktuar nuk eshte doktor', 16, -1);
 			ROLLBACK TRANSACTION;
@@ -170,10 +142,9 @@ AS BEGIN
 
 	IF EXISTS(
 		SELECT 1 
-		FROM Staf AS s
-		INNER JOIN RolStafi AS rs ON rs.Id = s.PersonId
-		INNER JOIN INSERTED AS i ON i.Infermier = s.PersonId
-		WHERE rs.Emertimi != 'Infermier')
+		FROM INSERTED AS i
+		INNER JOIN Staf ON i.InfermierId = Staf.PersonId
+		INNER JOIN RolStafi AS rs ON rs.Id = Staf.RolId AND rs.Emertimi != 'Infermier')
 		BEGIN
 			RAISERROR('Infermieri i percaktuar nuk eshte infermier', 16, -1);
 			ROLLBACK TRANSACTION;
@@ -252,11 +223,23 @@ AS BEGIN
 					ROLLBACK TRANSACTION;
 				END
  
+			-- Kontrollo qe nuk po perditesohet informacioni mjekesor nese eshte shkruajtur
 			IF
-				UPDATE(ShqetesimiKryesor) OR
-				UPDATE(KohezgjatjaShqetesimit) OR
-				UPDATE(SimptomaTeLidhura) OR
-				UPDATE(Konkluzioni)
+				EXISTS(
+					SELECT 1 
+					FROM DELETED
+					WHERE 
+						ShqetesimiKryesor IS NOT NULL OR
+						KohezgjatjaShqetesimit IS NOT NULL OR
+						SimptomaTeLidhura IS NOT NULL OR
+						Konkluzioni IS NOT NULL)
+				AND
+					(
+						UPDATE(ShqetesimiKryesor) OR
+						UPDATE(KohezgjatjaShqetesimit) OR
+						UPDATE(SimptomaTeLidhura) OR
+						UPDATE(Konkluzioni)
+					)
 				BEGIN
 					RAISERROR('Nuk mund te perditesohet informacioni mjekesor i takimit', 16, -1);
 					ROLLBACK TRANSACTION;
@@ -271,8 +254,8 @@ ON Fature
 FOR UPDATE
 AS BEGIN
 	IF 
-    (UPDATE(DataPagimit) OR UPDATE(MetodaPagimitId)) AND
-    EXISTS(SELECT 1 FROM DELETED WHERE DataPagimit IS NOT NULL OR MetodaPagimitId IS NOT NULL)
+		(UPDATE(DataPagimit) OR UPDATE(MetodaPagimitId)) AND
+		EXISTS(SELECT 1 FROM DELETED WHERE DataPagimit IS NOT NULL OR MetodaPagimitId IS NOT NULL)
 		BEGIN
 			RAISERROR('Nuk mund te ndryshohen data dhe metoda e pagimit pasi jane populluar', 16, -1);
 			ROLLBACK TRANSACTION;
@@ -291,24 +274,24 @@ CREATE OR ALTER TRIGGER ShtoFaturePerTakim
 ON Takim
 AFTER INSERT, UPDATE
 AS BEGIN
-	IF EXISTS(SELECT * FROM DELETED) -- Nese eshte perditesuar
-		BEGIN
-			-- Fshije faturen e takimit nese eshte anulluar
-			IF UPDATE(EshteAnulluar)
-				BEGIN
-					DELETE f FROM Fature AS f
-					INNER JOIN INSERTED AS i ON i.Id = f.TakimId
-					WHERE i.EshteAnulluar = 1;
-          
-					RETURN;
-				END
-		END
-	ELSE
-		-- Shto fature nese shtohet takim ose takimit i eshte hequr anullimi
-		INSERT INTO Fature(TakimId, Cmimi)
-		SELECT i.Id, sherbim.Cmimi
-		FROM INSERTED AS i
-		INNER JOIN Sherbim AS sherbim ON i.SherbimId = sherbim.Kodi;
+	-- Kryej veprimet mbi faturat perkatese
+	-- nese takimi eshte shtuar ose i eshte perditesuar kolona e anullimit
+	IF EXISTS(SELECT 1 FROM DELETED) AND NOT UPDATE(EshteAnulluar)
+		RETURN;
+
+	-- Fshi faturat e takimeve qe jane anulluar gjate perditesimit
+	IF EXISTS(SELECT 1 FROM DELETED)
+		DELETE f 
+		FROM Fature AS f
+		INNER JOIN INSERTED AS i ON i.Id = f.TakimId
+		WHERE i.EshteAnulluar = 1;
+
+	-- Shto fature nese shtohet takim ose takimit i eshte hequr anullimi
+	INSERT INTO Fature(TakimId, Cmimi)
+	SELECT i.Id, sherbim.Cmimi
+	FROM INSERTED AS i
+	INNER JOIN Sherbim AS sherbim ON i.SherbimId = sherbim.Kodi
+	WHERE i.EshteAnulluar = 0;
 END;
 
 GO
@@ -330,9 +313,9 @@ AS BEGIN
 			@userCommand VARCHAR(MAX) = 'CREATE USER ' + QUOTENAME(@NID) + ' FOR LOGIN ' + QUOTENAME(@NID),
 			@roleCommand VARCHAR(MAX) = 'ALTER ROLE Pacient ADD MEMBER ' + QUOTENAME(@NID);
 
-		EXEC(@loginCommand);
-		EXEC(@userCommand);
-		EXEC(@roleCommand);
+		EXECUTE (@loginCommand);
+		EXECUTE (@userCommand);
+		EXECUTE (@roleCommand);
 
 		FETCH NEXT FROM nid_cursor INTO @NID
 	END
@@ -362,9 +345,9 @@ AS BEGIN
 				@userCommand VARCHAR(MAX) = 'CREATE USER ' + QUOTENAME(@punonjesId) + ' FOR LOGIN ' + QUOTENAME(@punonjesId),
 				@roleCommand VARCHAR(MAX) = 'ALTER ROLE ' + QUOTENAME(@roli) + ' ADD MEMBER ' + QUOTENAME(@punonjesId);
 
-		EXEC(@loginCommand);
-		EXEC(@userCommand);
-		EXEC(@roleCommand);
+		EXECUTE (@loginCommand);
+		EXECUTE (@userCommand);
+		EXECUTE (@roleCommand);
 		
 		FETCH NEXT FROM pid_cursor INTO @punonjesId, @roli
 	END
@@ -392,8 +375,8 @@ AS BEGIN
 		DECLARE @loginCommand VARCHAR(MAX) = 'DROP LOGIN ' + QUOTENAME(@punonjesId),
 				@userCommand VARCHAR(MAX) = 'DROP USER ' + QUOTENAME(@punonjesId);
 
-		EXEC(@loginCommand);
-		EXEC(@userCommand);
+		EXECUTE (@loginCommand);
+		EXECUTE (@userCommand);
 	END
 
 	CLOSE pid_cursor;

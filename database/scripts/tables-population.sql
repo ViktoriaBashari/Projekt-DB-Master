@@ -1,6 +1,6 @@
 USE Spitali;
 
-bulk insert [dbo].[Sherbim]
+BULK INSERT [dbo].[Sherbim]
 FROM 'C:\Users\DELL\Documents\GitHub\Projekt-DB-Master\database\tables_data_csv\sherbim.csv'
 WITH
 (
@@ -9,9 +9,9 @@ WITH
     FIRSTROW = 2,           -- If your CSV file has headers, start from the second row
 	CHECK_CONSTRAINTS
 );
-select * from Sherbim
+SELECT * FROM Sherbim
 
-bulk insert [dbo].[Departament]
+BULK INSERT [dbo].[Departament]
 FROM 'C:\Users\DELL\Documents\GitHub\Projekt-DB-Master\database\tables_data_csv\departament.csv'
 WITH
 (
@@ -20,11 +20,11 @@ WITH
     FIRSTROW = 2,           -- If your CSV file has headers, start from the second row
 	KEEPIDENTITY
 );
-select * from Departament
+SELECT * FROM Departament
 
 
 
-bulk insert [dbo].[Person]
+BULK INSERT [dbo].[Person]
 FROM 'C:\Users\DELL\Documents\GitHub\Projekt-DB-Master\database\tables_data_csv\person.csv'
 WITH
 (
@@ -34,20 +34,19 @@ WITH
 	KEEPIDENTITY,
 	CHECK_CONSTRAINTS
 );
-select * from Person
+SELECT * FROM Person
 
-bulk insert [dbo].[Staf]
+BULK INSERT [dbo].[Staf]
 FROM 'C:\Users\DELL\Documents\GitHub\Projekt-DB-Master\database\tables_data_csv\staf.csv'
 WITH
 (
     FIELDTERMINATOR = ',',  -- The delimiter used in your CSV file
     ROWTERMINATOR = '\n',   -- The line break character
-    FIRSTROW = 2,           -- If your CSV file has headers, start from the second row
-	CHECK_CONSTRAINTS
+    FIRSTROW = 2           -- If your CSV file has headers, start from the second row
 );
-select * from Staf
+SELECT * FROM Staf
 
-bulk insert [dbo].[Pacient]
+BULK INSERT [dbo].[Pacient]
 FROM 'C:\Users\DELL\Documents\GitHub\Projekt-DB-Master\database\tables_data_csv\pacient.csv'
 WITH
 (
@@ -56,11 +55,9 @@ WITH
     FIRSTROW = 2,           -- If your CSV file has headers, start from the second row
 	CHECK_CONSTRAINTS
 );
-select * from Pacient
+SELECT * FROM Pacient
 
-
-
-bulk insert [dbo].[Adrese]
+BULK INSERT [dbo].[Adrese]
 FROM 'C:\Users\DELL\Documents\GitHub\Projekt-DB-Master\database\tables_data_csv\adrese.csv'
 WITH
 (
@@ -69,23 +66,22 @@ WITH
     FIRSTROW = 2,           -- If your CSV file has headers, start from the second row
 	CHECK_CONSTRAINTS
 );
-select * from Adrese
+SELECT * FROM Adrese
 
 
 
-bulk insert [dbo].[Takim]
+BULK INSERT [dbo].[Takim]
 FROM 'C:\Users\DELL\Documents\GitHub\Projekt-DB-Master\database\tables_data_csv\takim.csv'
 WITH
 (
     FIELDTERMINATOR = ',',  -- The delimiter used in your CSV file
     ROWTERMINATOR = '\n',   -- The line break character
     FIRSTROW = 2,           -- If your CSV file has headers, start from the second row
-	KEEPIDENTITY,
-	CHECK_CONSTRAINTS
+	KEEPIDENTITY
 );
-select * from Takim
+SELECT * FROM Takim
 
-bulk insert [dbo].[Fature]
+BULK INSERT [dbo].[Fature]
 FROM 'C:\Users\DELL\Documents\GitHub\Projekt-DB-Master\database\tables_data_csv\fature.csv'
 WITH
 (
@@ -94,11 +90,11 @@ WITH
     FIRSTROW = 2,           -- If your CSV file has headers, start from the second row
 	CHECK_CONSTRAINTS
 );
-select * from Fature
+SELECT * FROM Fature
 
 
 
-bulk insert [dbo].[TurnOrari]
+BULK INSERT [dbo].[TurnOrari]
 FROM 'C:\Users\DELL\Documents\GitHub\Projekt-DB-Master\database\tables_data_csv\turn_orari.csv'
 WITH
 (
@@ -108,9 +104,9 @@ WITH
 	KEEPIDENTITY,
 	CHECK_CONSTRAINTS
 );
-select * from TurnOrari
+SELECT * FROM TurnOrari
 
-bulk insert [dbo].[Orar]
+BULK INSERT [dbo].[Orar]
 FROM 'C:\Users\DELL\Documents\GitHub\Projekt-DB-Master\database\tables_data_csv\orar.csv'
 WITH
 (
@@ -119,9 +115,9 @@ WITH
     FIRSTROW = 2,           -- If your CSV file has headers, start from the second row
 	CHECK_CONSTRAINTS
 );
-select * from Orar
+SELECT * FROM Orar
 
-bulk insert [dbo].[DiteTurni]
+BULK INSERT [dbo].[DiteTurni]
 FROM 'C:\Users\DELL\Documents\GitHub\Projekt-DB-Master\database\tables_data_csv\dite_turni.csv'
 WITH
 (
@@ -130,11 +126,11 @@ WITH
     FIRSTROW = 2,           -- If your CSV file has headers, start from the second row
 	CHECK_CONSTRAINTS
 );
-select * from DiteTurni
+SELECT * FROM DiteTurni
 
 
 
-bulk insert [dbo].[AnamnezaAbuzimit]
+BULK INSERT [dbo].[AnamnezaAbuzimit]
 FROM 'C:\Users\DELL\Documents\GitHub\Projekt-DB-Master\database\tables_data_csv\anamneza_abuzimit.csv'
 WITH
 (
@@ -143,9 +139,9 @@ WITH
     FIRSTROW = 2,           -- If your CSV file has headers, start from the second row
 	CHECK_CONSTRAINTS
 );
-select * from AnamnezaAbuzimit;
+SELECT * FROM AnamnezaAbuzimit;
 
-bulk insert [dbo].[AnamnezaFarmakologjike]
+BULK INSERT [dbo].[AnamnezaFarmakologjike]
 FROM 'C:\Users\DELL\Documents\GitHub\Projekt-DB-Master\database\tables_data_csv\anamneza_farmakologjike.csv'
 WITH
 (
@@ -154,9 +150,9 @@ WITH
     FIRSTROW = 2,           -- If your CSV file has headers, start from the second row
 	CHECK_CONSTRAINTS
 );
-select * from AnamnezaFarmakologjike
+SELECT * FROM AnamnezaFarmakologjike
 
-bulk insert [dbo].[AnamnezaSemundjes]
+BULK INSERT [dbo].[AnamnezaSemundjes]
 FROM 'C:\Users\DELL\Documents\GitHub\Projekt-DB-Master\database\tables_data_csv\anamneza_semundjes.csv'
 WITH
 (
@@ -165,9 +161,9 @@ WITH
     FIRSTROW = 2,           -- If your CSV file has headers, start from the second row
 	CHECK_CONSTRAINTS
 );
-select * from AnamnezaSemundjes
+SELECT * FROM AnamnezaSemundjes
 
-bulk insert [dbo].[AnamnezaFamiljare]
+BULK INSERT [dbo].[AnamnezaFamiljare]
 FROM 'C:\Users\DELL\Documents\GitHub\Projekt-DB-Master\database\tables_data_csv\anamneza_familjare.csv'
 WITH
 (
@@ -176,9 +172,9 @@ WITH
     FIRSTROW = 2,           -- If your CSV file has headers, start from the second row
 	CHECK_CONSTRAINTS
 );
-select * from AnamnezaFamiljare
+SELECT * FROM AnamnezaFamiljare
 
-bulk insert [dbo].[AnamnezaFiziologjike]
+BULK INSERT [dbo].[AnamnezaFiziologjike]
 FROM 'C:\Users\DELL\Documents\GitHub\Projekt-DB-Master\database\tables_data_csv\anamneza_fiziologjike.csv'
 WITH
 (
@@ -187,4 +183,4 @@ WITH
     FIRSTROW = 2,           -- If your CSV file has headers, start from the second row
 	CHECK_CONSTRAINTS
 );
-select * from AnamnezaFiziologjike
+SELECT * FROM AnamnezaFiziologjike

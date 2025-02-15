@@ -255,3 +255,70 @@ AS BEGIN
 END;
 
 GO
+
+-- Per te krijuar administratore dhe recepsioniste
+CREATE OR ALTER PROCEDURE ShtoStafAdministratues
+(
+	@Username VARCHAR(MAX),
+	@Password VARCHAR(MAX),
+	@Roli VARCHAR(MAX)
+)
+AS BEGIN
+	SET NOCOUNT ON;
+
+	IF @Roli NOT IN ('Administrator', 'Recepsionist')
+		RAISERROR('Specifiko rolin e perdoruesit te ri (Administrator, ose recepsionist)', 16, -1);
+
+	DECLARE @loginCommand VARCHAR(MAX) = 'CREATE LOGIN ' + QUOTENAME(@Username) + ' WITH PASSWORD = ' + QUOTENAME(@Password, ''''),
+		@userCommand VARCHAR(MAX) = 'CREATE USER ' + QUOTENAME(@Username) + ' FOR LOGIN ' + QUOTENAME(@Username),
+		@roleCommand VARCHAR(MAX) = 'ALTER ROLE ' + @Roli + ' ADD MEMBER ' + QUOTENAME(@Username);
+
+	BEGIN TRANSACTION ShtoPerdoruesAdminTrans
+		BEGIN TRY
+			EXECUTE(@loginCommand);
+			EXECUTE(@userCommand);
+			EXECUTE(@roleCommand);
+			COMMIT TRANSACTION ShtoPerdoruesAdminTrans;
+		END TRY
+
+		BEGIN CATCH
+			ROLLBACK TRANSACTION ShtoPerdoruesAdminTrans;
+		END CATCH
+END;
+
+GO
+
+CREATE OR ALTER PROCEDURE FshiStafAdministratues
+(
+	@Username VARCHAR(MAX)
+)
+AS BEGIN
+	SET NOCOUNT ON;
+
+	-- Kontrollo per ekzistencen e perdoruesit per tu fshire
+	IF NOT EXISTS(
+		SELECT 1
+		FROM sys.sql_logins
+		WHERE name = @Username)
+		RAISERROR('Perdoruesi nuk ekziston', 16, -1);
+
+	-- Kontrollo rolin e perdoruesit te zgjedhur per fshirje
+	IF IS_ROLEMEMBER('Administrator', @Username) != 1 OR IS_ROLEMEMBER('Recepsionist', @Username) != 1
+		RAISERROR('Perdoruesi nuk ekziston', 16, -1);
+
+	DECLARE @loginCommand VARCHAR(MAX) = 'DROP LOGIN ' + QUOTENAME(@Username),
+		@userCommand VARCHAR(MAX) = 'DROP USER ' + QUOTENAME(@Username);
+
+	BEGIN TRANSACTION FshiPerdoruesAdminTrans
+		BEGIN TRY
+			EXECUTE(@userCommand);
+			EXECUTE(@loginCommand);
+			COMMIT TRANSACTION FshiPerdoruesAdminTrans;
+		END TRY
+
+		BEGIN CATCH
+			ROLLBACK TRANSACTION FshiPerdoruesAdminTrans;
+		END CATCH
+END;
+
+GO
