@@ -57,6 +57,7 @@ GRANT UPDATE(DataPagimit, MetodaPagimitId) ON Fature TO Recepsionist;
 
 GRANT SELECT(Id, DataKrijimit, DataTakimit, DoktorId, PacientId, SherbimId) ON Takim TO Pacient;
 GRANT SELECT(Id, DataKrijimit, DataTakimit, DoktorId, InfermierId, SherbimId, EshteAnulluar) ON Takim TO Administrator;
+GRANT SELECT ON TakimDetajuar TO Doktor, Infermier;
 
 GRANT 
 	SELECT, 

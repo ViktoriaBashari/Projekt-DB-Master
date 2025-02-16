@@ -43,7 +43,7 @@ RETURNS TABLE
 WITH SCHEMABINDING
 AS RETURN
 	SELECT 
-		CASE WHEN IS_ROLEMEMBER('Receptionist', CURRENT_USER) = 1 THEN
+		CASE WHEN IS_ROLEMEMBER('Recepsionist', CURRENT_USER) = 1 THEN
 			(SELECT 1)
 		ELSE
 			(SELECT 1 FROM dbo.Takim
@@ -65,21 +65,17 @@ CREATE OR ALTER FUNCTION Security.fn_SecurityPredicate_Takimet()
 RETURNS TABLE
 WITH SCHEMABINDING
 AS RETURN
-	SELECT 
-		CASE WHEN IS_ROLEMEMBER('Receptionist', CURRENT_USER) = 1 THEN
-			(SELECT 1)
-		WHEN IS_ROLEMEMBER('Pacient', CURRENT_USER) = 1 THEN
-			(SELECT 1 AS SecurityPredicateResult
-			FROM dbo.Takim
-			INNER JOIN dbo.Pacient ON PacientId = Pacient.PersonId
-			WHERE Pacient.NID = CURRENT_USER)
-		ELSE
-			(SELECT 1 AS SecurityPredicateResult
-			FROM dbo.Takim
-			INNER JOIN dbo.Staf AS doc ON DoktorId = doc.PersonId
-			INNER JOIN dbo.Staf AS inf ON InfermierId = inf.PersonId
-			WHERE doc.PunonjesId = CURRENT_USER OR inf.PunonjesId = CURRENT_USER)
-		END AS SecurityPredicateResult;
+	SELECT 1 AS SecurityPredicateResult
+	FROM dbo.Takim AS t
+	INNER JOIN dbo.Pacient ON t.PacientId = Pacient.PersonId
+	INNER JOIN dbo.Staf AS doc ON t.DoktorId = doc.PersonId
+	INNER JOIN dbo.Staf AS inf ON t.InfermierId = inf.PersonId
+	WHERE
+		IS_ROLEMEMBER('Recepsionist', CURRENT_USER) = 1 OR
+		IS_ROLEMEMBER('Administrator', CURRENT_USER) = 1 OR
+		(IS_ROLEMEMBER('Pacient', CURRENT_USER) = 1 AND Pacient.NID = CURRENT_USER) OR
+		(IS_ROLEMEMBER('Doktor', CURRENT_USER) = 1 AND doc.PunonjesId = CURRENT_USER ) OR
+		(IS_ROLEMEMBER('Infermier', CURRENT_USER) = 1 AND inf.PunonjesId = CURRENT_USER);
 
 GO
 

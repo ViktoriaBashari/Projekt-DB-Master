@@ -32,7 +32,7 @@ AS BEGIN
 		SELECT 1
 		FROM inserted AS i
 		WHERE dbo.EshtePacientiNenKujdesinAnetaritStafit(i.PacientId, CURRENT_USER) = 0)
-		THROW 401, 'Veprim i paautorizuar', 1;
+		THROW 50401, 'Veprim i paautorizuar', 1;
 
 	INSERT INTO AnamnezaFamiljare(PacientId, StafiPergjegjesId, LidhjaFamiljare, Datelindja, Semundja, MoshaDiagnozes, ShkakuVdekjes, DataVdekjes)
 	SELECT i.PacientId, staf.PersonId, i.LidhjaFamiljare, i.Datelindja, i.Semundja, i.MoshaDiagnozes, i.ShkakuVdekjes, i.DataVdekjes
@@ -51,7 +51,7 @@ AS BEGIN
 		SELECT 1
 		FROM inserted AS i
 		WHERE dbo.EshtePacientiNenKujdesinAnetaritStafit(i.PacientId, CURRENT_USER) = 0)
-		THROW 401, 'Veprim i paautorizuar', 1;
+		THROW 50401, 'Veprim i paautorizuar', 1;
 
 	INSERT INTO AnamnezaFiziologjike(PacientId, StafiPergjegjesId, SistemiFrymemarrjes, SistemiGjenitourinar, SistemiTretes, SistemiOkular, SistemiNeurologjik, SistemiORL, SistemiKardiovaskular)
 	SELECT i.PacientId, staf.PersonId, i.SistemiFrymemarrjes, i.SistemiGjenitourinar, i.SistemiTretes, i.SistemiOkular, i.SistemiNeurologjik, i.SistemiORL, i.SistemiKardiovaskular
@@ -70,7 +70,7 @@ AS BEGIN
 		SELECT 1
 		FROM inserted AS i
 		WHERE dbo.EshtePacientiNenKujdesinAnetaritStafit(i.PacientId, CURRENT_USER) = 0)
-		THROW 401, 'Veprim i paautorizuar', 1;
+		THROW 50401, 'Veprim i paautorizuar', 1;
 
 	INSERT INTO AnamnezaSemundjes(PacientId, StafiPergjegjesId, Semundja, DataDiagnozes, EshteKronike)
 	SELECT i.PacientId, staf.PersonId, i.Semundja, i.DataDiagnozes, i.EshteKronike
@@ -89,7 +89,7 @@ AS BEGIN
 		SELECT 1
 		FROM inserted AS i
 		WHERE dbo.EshtePacientiNenKujdesinAnetaritStafit(i.PacientId, CURRENT_USER) = 0)
-		THROW 401, 'Veprim i paautorizuar', 1;
+		THROW 50401, 'Veprim i paautorizuar', 1;
 
 	INSERT INTO AnamnezaAbuzimit(PacientId, StafiPergjegjesId, Substanca, Pershkrimi, DataFillimit, DataPerfundimit)
 	SELECT i.PacientId, staf.PersonId, i.Substanca, i.Pershkrimi, i.DataFillimit, i.DataPerfundimit
@@ -108,7 +108,7 @@ AS BEGIN
 		SELECT 1
 		FROM inserted AS i
 		WHERE dbo.EshtePacientiNenKujdesinAnetaritStafit(i.PacientId, CURRENT_USER) = 0)
-		THROW 401, 'Veprim i paautorizuar', 1;
+		THROW 50401, 'Veprim i paautorizuar', 1;
 
 	INSERT INTO AnamnezaFarmakologjike(PacientId, StafiPergjegjesId, Ilaci, Doza, Arsyeja, DataFillimit, DataPerfundimit, MarrePaRecete)
 	SELECT i.PacientId, staf.PersonId, i.Ilaci, i.Doza, i.Arsyeja, i.DataFillimit, i.DataPerfundimit, i.MarrePaRecete

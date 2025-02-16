@@ -190,36 +190,19 @@ AS BEGIN
 				RAISERROR('Specifikoni nje anetar stafi', 16, -1);
 
 			SELECT 
-				Takim.Id, DataKrijimit, DataTakimit, 
-				DoktorId, doc_p.Emri AS Doktor_Emri, doc_p.Mbiemri AS Doktor_Mbiemri,
-				InfermierId, inf_p.Emri AS Infermier_Emri, inf_p.Mbiemri AS Infermier_Mbiemri 
-			FROM Takim
-			INNER JOIN Staf AS doc ON DoktorId = doc.PersonId
-				INNER JOIN Person AS doc_p ON doc_p.Id = doc.PersonId
-			INNER JOIN Staf AS inf ON InfermierId = inf.PersonId
-				INNER JOIN Person AS inf_p ON inf_p.Id = inf.PersonId
+				Id, DataKrijimit, DataTakimit, 
+				DoktorId, DoktorEmri, DoktorMbiemri,
+				InfermierId, InfermierEmri, InfermierMbiemri 
+			FROM TakimDetajuar
 			WHERE 
 				DataTakimit >= @DataFillimit AND 
 				(@DataPerfundimit IS NULL OR DataTakimit <= @DataPerfundimit)
 			ORDER BY DataTakimit DESC;
 		END;
 	ELSE
-		SELECT 
-			Takim.Id, DataKrijimit, DataTakimit, 
-			ShqetesimiKryesor, KohezgjatjaShqetesimit, SimptomaTeLidhura, Konkluzioni
-			DoktorId, doc_p.Emri AS Doktor_Emri, doc_p.Mbiemri AS Doktor_Mbiemri,
-			InfermierId, inf_p.Emri AS Infermier_Emri, inf_p.Mbiemri AS Infermier_Mbiemri,
-			PacientId, pacient.Emri AS Pacient_Emri, pacient.Mbiemri AS Pacient_Mbiemri,
-			SherbimId, Sherbim.Emri
-		FROM Takim
-		INNER JOIN Staf AS doc ON DoktorId = doc.PersonId
-			INNER JOIN Person AS doc_p ON doc_p.Id = doc.PersonId
-		INNER JOIN Staf AS inf ON InfermierId = inf.PersonId
-			INNER JOIN Person AS inf_p ON inf_p.Id = inf.PersonId
-		INNER JOIN Person AS pacient ON pacient.Id = PacientId
-		INNER JOIN Sherbim ON SherbimId = Sherbim.Kodi
+		SELECT *
+		FROM TakimDetajuar
 		WHERE
-			(doc.PunonjesId = CURRENT_USER OR inf.PunonjesId = CURRENT_USER) AND 
 			DataTakimit >= @DataFillimit AND 
 			(@DataPerfundimit IS NULL OR DataTakimit <= @DataPerfundimit)
 		ORDER BY DataTakimit DESC;

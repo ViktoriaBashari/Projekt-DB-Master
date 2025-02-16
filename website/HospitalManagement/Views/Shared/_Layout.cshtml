@@ -40,6 +40,13 @@
                                 <a class="nav-link" asp-controller="Staff" asp-action="Index">Stafi</a>
                             </li>
                         }
+                        @if(User.FindFirst(ClaimTypes.Role)?.Value == nameof(Roles.Infermier) ||
+                        User.FindFirst(ClaimTypes.Role)?.Value == nameof(Roles.Doktor))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Appointments" asp-action="Index">Takimet</a>
+                            </li>
+                        }
 
                         @if (User.Identity.IsAuthenticated)
                         {

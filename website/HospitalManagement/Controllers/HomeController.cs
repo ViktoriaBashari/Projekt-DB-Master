@@ -78,6 +78,9 @@ namespace HospitalManagement.Controllers
             // If user has auth cookie, show different dashboard based on role
             switch(User.FindFirst(ClaimTypes.Role)!.Value)
             {
+                case nameof(Roles.Infermier):
+                case nameof(Roles.Doktor):
+                    return RedirectToAction(nameof(AppointmentsController.Index), "Appointments");
                 case nameof(Roles.Administrator): 
                     return RedirectToAction(nameof(PerformanceController.Index), "Performance");
                 default:

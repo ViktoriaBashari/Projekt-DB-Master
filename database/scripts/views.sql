@@ -97,3 +97,21 @@ CREATE OR ALTER VIEW OrariPersonalStafit AS
 	WHERE PunonjesId = CURRENT_USER;
 
 GO
+
+CREATE OR ALTER VIEW TakimDetajuar AS
+	SELECT 
+			Takim.Id, DataKrijimit, DataTakimit, 
+			ShqetesimiKryesor, KohezgjatjaShqetesimit, SimptomaTeLidhura, Konkluzioni,
+			DoktorId, doc_p.Emri AS DoktorEmri, doc_p.Mbiemri AS DoktorMbiemri,
+			InfermierId, inf_p.Emri AS InfermierEmri, inf_p.Mbiemri AS InfermierMbiemri,
+			PacientId, pacient.Emri AS PacientEmri, pacient.Mbiemri AS PacientMbiemri,
+			SherbimId, Sherbim.Emri AS SherbimEmri
+		FROM Takim
+		INNER JOIN Staf AS doc ON DoktorId = doc.PersonId
+			INNER JOIN Person AS doc_p ON doc_p.Id = doc.PersonId
+		INNER JOIN Staf AS inf ON InfermierId = inf.PersonId
+			INNER JOIN Person AS inf_p ON inf_p.Id = inf.PersonId
+		INNER JOIN Person AS pacient ON pacient.Id = PacientId
+		INNER JOIN Sherbim ON SherbimId = Sherbim.Kodi;
+
+GO
