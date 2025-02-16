@@ -1,0 +1,21 @@
+Id,PacientId,StafiPergjegjesId,Substanca,Pershkrimi,DataFillimit,DataPerfundimit
+1,24,13,Alkool,Perdorim i rralle,5/22/2007,2/5/2011
+2,32,11,Duhan,Perdorim i shpeshte,3/25/2011,
+3,40,9,Marihuane,Varesi e rende,3/30/2006,2/3/2009
+4,33,11,Droga te forta,Eksperimentim,4/30/2022,
+5,27,5,Alkool,,5/12/2001,7/23/2002
+6,25,10,Duhan,Perdorim i shpeshte,11/11/2023,
+7,33,9,Marihuane,Varesi e rende,7/31/2001,2/6/2011
+8,37,9,Droga te forta,Eksperimentim,12/25/2017,
+9,21,18,Alkool,Perdorim i rralle,7/11/2006,2/7/2013
+10,38,16,Duhan,Perdorim i shpeshte,7/2/2015,
+11,23,4,Marihuane,Varesi e rende,12/30/2022,2/9/2025
+12,28,8,Droga te forta,Eksperimentim,12/3/2006,
+13,21,16,Alkool,Perdorim i rralle,8/30/2018,4/3/2019
+14,25,19,Duhan,Perdorim i shpeshte,1/30/2001,
+15,22,9,Marihuane,Varesi e rende,1/11/2021,11/27/2022
+16,26,8,Droga te forta,Eksperimentim,7/29/2008,
+17,28,10,Alkool,Perdorim i rralle,2/2/2012,6/25/2016
+18,33,9,Duhan,,10/9/2014,
+19,39,8,Marihuane,Varesi e rende,5/10/2007,12/23/2008
+20,33,3,Droga te forta,Eksperimentim,12/27/2019,12/23/2021

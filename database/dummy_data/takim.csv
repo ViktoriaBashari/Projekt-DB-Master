@@ -1,0 +1,23 @@
+﻿Id,DataKrijimit,DataTakimit,DoktorId,InfermierId,PacientId,SherbimId,ShqetesimiKryesor,KohezgjatjaShqetesimit,SimptomaTeLidhura,Konkluzioni,EshteAnulluar
+1,1/1/2023 7:00:00,1/1/2023 7:30:00,8,20,21,SH006,Dhimbje koke,1 jave,Asnje ,Ne rregull,0
+2,5/22/2023 14:34:00,5/24/2023 15:00:00,7,13,22,SH002,Lodhje,2 muaj,Asnje,Ne rregull,0
+3,7/6/2023 17:45:00,7/6/2023 18:00:00,3,19,23,SH001,Temperature,5 dite,Asnje,Ne rregull,0
+4,2/4/2023 20:13:00,2/6/2023 8:50:00,2,4,24,SH005,Hipertension,2 jave,Dhimbje koke,Ne rregull,1
+5,12/5/2023 21:00:00,12/7/2023 9:30:00,5,14,25,SH008,Diabet,1 muaj,Asnje,Ne rregull,0
+6,2/16/2024 22:45:00,2/19/2024 9:40:00,12,13,26,SH018,Alergji,1 jave,Asnje,Ne rregull,0
+7,2/17/2024 21:24:00,2/26/2024 12:00:00,4,9,27,SH017,Probleme me gjumin,2 muaj,Lodhje,Ne rregull,0
+8,2/28/2024 14:00:23,3/8/2024 6:50:00,10,18,28,SH013,Dhimbje muskujsh,5 dite,Lodhje,Ne rregull,0
+9,10/9/2024 10:23:00,10/18/2024 18:00:00,1,16,29,SH002,Infeksion,3 dite,Temperature,Ne rregull,0
+10,3/3/2024 22:34:00,3/4/2024 8:30:00,7,20,30,SH017,Stres,4 muaj,Asnje,Ne rregull,1
+11,6/11/2024 19:00:00,6/11/2024 19:00:00,3,13,31,SH016,Probleme me tretjen,2 jave ,Asnje,Ne rregull,0
+12,4/12/2024 20:00:00,4/12/2024 20:30:00,2,14,32,SH011,Anemi,2 vite,Asnje,Ne rregull,0
+13,11/20/2024 13:50:00,11/20/2024 13:50:00,5,12,33,SH005,Probleme me zemren,1 vit,Hiper tension,Ne rregull,0
+14,9/27/2024 9:45:00,9/27/2024 9:50:00,5,18,34,SH004,Astma,3 vite,Asnje,Ne rregull,0
+15,5/14/2024 14:45:00,5/15/2024 9:15:00,3,14,35,SH002,Semundje tiroide,3 vite,Asnje,Ne rregull,0
+16,5/16/2024 15:55:00,5/16/2024 15:55:00,12,20,36,SH013,Dhimbje mesi,3 jave,Asnje,Ne rregull,1
+17,5/17/2024 7:59:00,5/17/2024 14:15:00,4,19,37,SH001,Marramendje,1 jave,Asnje,Ne rregull,0
+18,2/18/2025 22:56:00,2/22/2025 15:15:00,10,13,38,SH002,Tension i ulet,2 muaj,Asnje,Ne rregull,1
+19,1/30/2025 20:34:34,2/9/2025 8:00:00,7,13,39,SH017,Pagjumesi,1 muaj,Asnje,Ne rregull,1
+20,2/20/2025 9:21:46,2/20/2025 10:30:00,1,18,40,SH001,Artrit,4 vite,Asnje,Ne rregull,1
+21,2/20/2025 9:56:46,2/20/2025 13:30:00,1,18,40,SH001,Stres,4 muaj,Asnje,Ne rregull,0
+22,1/15/2025 9:46:00,1/20/2025 13:00:00,1,18,40,SH001,Stres,4 muaj,Asnje,Ne rregull,0
