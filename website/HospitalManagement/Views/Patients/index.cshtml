@@ -1,0 +1,43 @@
+@model List<HospitalManagement.Models.Data.Pacient>
+
+@{
+    ViewData["Title"] = "Lista e Pacientëve";
+}
+
+<h2 class="text-center my-4">Lista e Pacientëve</h2>
+
+<div class="container">
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Emri</th>
+                <th>Mbiemri</th>
+                <th>Mosha</th>
+                <th>Gjinia</th>
+                <th class="text-center">Veprime</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var pacient in Model)
+            {
+                <tr>
+                    <td>@pacient.Id</td>
+                    <td>@pacient.Emri</td>
+                    <td>@pacient.Mbiemri</td>
+                    <td>@pacient.Mosha</td>
+                    <td>@pacient.Gjinia</td>
+                    <td class="text-center">
+                        <a asp-action="Upsert" asp-route-id="@pacient.Id" class="btn btn-sm btn-primary">Edito</a>
+                        <form asp-action="DeletePatient" asp-route-id="@pacient.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('A jeni i sigurt?');">Fshi</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="text-center mt-3">
+        <a asp-action="Upsert" class="btn btn-success">Shto Pacient</a>
+    </div>
+</div>
