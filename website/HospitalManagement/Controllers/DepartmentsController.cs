@@ -15,21 +15,39 @@ public class DepartmentsController : BaseController
     public DepartmentsController(IConfiguration configuration) : base(configuration) { }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int page = 0, int size = 10)
     {
         var connectionString = _configuration.GetConnectionString(_dbConnectionStringName);
         using var connection = new SqlConnection(connectionString);
 
-        var departaments = await connection.QueryAsync<Department>(
+        var result = await connection.QueryMultipleAsync(
             """
             EXECUTE AS USER = @Username;
-            SELECT * FROM InformacionDepartament;
+            
+            SELECT * 
+            FROM InformacionDepartament
+            ORDER BY Id
+            OFFSET @Offset ROWS FETCH NEXT @Limit ROWS ONLY;
+            
+            SELECT 
+            CASE WHEN EXISTS(
+            	SELECT 1 
+            	FROM InformacionDepartament
+            	ORDER BY Id
+            	OFFSET (@Offset + @Limit) ROWS)
+            THEN 1 
+            ELSE 0 END
+            AS EkzistonFaqeTjeter;
+
             REVERT;
             """,
-            new { Username = GetLoggedInUsername() });
+            new { Username = GetLoggedInUsername(), Offset = page * size, Limit = size });
+
+        var departments = await result.ReadAsync<Department>();
+        ViewBag.HasNextPage = (await result.ReadSingleAsync<int>()) == 1;
 
         await connection.CloseAsync();
-        return View(departaments.ToList());
+        return View(departments.ToList());
     }
 
     [HttpDelete]

@@ -205,7 +205,7 @@ public class PerformanceController : BaseController
             () => new { Id = default(int), Emri = default(string), Mbiemri = default(string), NrTakimeve = default(int) },
             """
                 EXECUTE AS USER = @Username;
-                EXEC dbo.GjeneroStafinMeTePerdorur @MonthlyDistribution, @RoleId, @Year;
+                EXEC dbo.GjeneroStafinMeTePerdorur @RoleId, @Year;
                 REVERT;
             """,
             new
@@ -237,7 +237,7 @@ public class PerformanceController : BaseController
             },
             """
                 EXECUTE AS USER = @Username;
-                EXEC dbo.GjeneroProceduratMeTePerdorura @MonthlyDistribution, @Year;
+                EXEC dbo.GjeneroSherbimetMeTePerdorura @MonthlyDistribution, @Year;
                 REVERT;
             """,
             new

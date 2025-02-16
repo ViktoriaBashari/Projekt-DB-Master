@@ -2,6 +2,11 @@
 @using HospitalManagement.Models.ViewModels
 @model IList<Treatment>
 
+@{
+	var currentPageString = Context.Request.Query["page"].ToString();
+	int currentPage = string.IsNullOrWhiteSpace(currentPageString) ? 0 : int.Parse(currentPageString);
+}
+
 <h1 class="text-primary fw-bold">Sherbimet</h1>
 
 <a asp-action="Upsert" class="btn btn-primary my-3">Shto sherbim te ri</a>
@@ -36,6 +41,17 @@
 		}
 	</tbody>
 </table>
+
+<nav class="d-flex gap-2 mt-4 justify-content-end">
+	@if (currentPage > 0)
+	{
+		<a asp-action="Index" asp-route-page="@(currentPage - 1)" class="page-link">⮜ Kthehu mbrapa</a>
+	}
+	@if (ViewBag.HasNextPage)
+	{
+		<a asp-action="Index" asp-route-page="@(currentPage + 1)" class="page-link">Vazhdo ⮞</a>
+	}
+</nav>
 
 @section Scripts {
 	<script>

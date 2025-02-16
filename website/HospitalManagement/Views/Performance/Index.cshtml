@@ -26,7 +26,7 @@
 
 		<tr>
 			<td><b>Norma e pritjes per takim per pacientet</b></td>
-			<td>@Model.PatientMeetingWaitingTimeNorm.ToString("0.000")</td>
+			<td>@Model.PatientMeetingWaitingTimeNorm.ToString("0.000") minuta</td>
 		</tr>
 
 		<tr>
@@ -212,11 +212,6 @@
 						<label for="year">Viti</label>
 					</div>
 
-					<div class="form-check">
-						<input name="monthlyDistribution" type="checkbox" checked class="form-check-input" />
-						<label for="monthlyDistribution" class="form-check-label">Distributim mujor</label>
-					</div>
-
 					<input type="submit" value="Rifresko" class="btn btn-secondary btn-sm" />
 				</form>
 			</td>
@@ -372,7 +367,7 @@
 				data: { labels: monthsLabels, datasets: [] },
 				options: {
 					parsing: { xAxisKey: "muaji", yAxisKey: "tarifaMesatareTrajtimit"},
-					scales: { y: { title: { display: true, text: "Tarifa mesatare e trajtimit" }} }
+					scales: { y: { title: { display: true, text: "Tarifa mesatare e trajtimit (LEK)" }} }
 				}
 			}
 		);
@@ -425,7 +420,11 @@
 				dataSrc: ""
 			},
 			columns: [
-				{ data: null, render: (data, type, row) => `${row.emri} ${row.mbiemri}` },
+				{ 
+					data: null, 
+					name: "Emri",
+					render: (data, type, row) => `<a href=@Url.Action("Details", "Staff")?personId=${row.id}>${row.emri} ${row.mbiemri}</a>`
+				},
 				{ data: "nrTakimeve" }
 			]
 		});
@@ -442,7 +441,6 @@
 				url: "@Url.Action("MostPopularTreatments", "Performance")",
 				data: function(d) {
 					d.year = mostPopularTreatmentsForm.elements["year"].value;
-					d.monthlyDistribution = mostPopularTreatmentsForm.elements["monthlyDistribution"].value;
 				},
 				dataSrc: "",
 				type: "POST",

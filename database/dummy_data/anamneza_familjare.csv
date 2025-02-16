@@ -1,4 +1,4 @@
-Id,PacientId,StafiPergjegjesId,LidhjaFamiljare,DateLindja,Semundja,MoshaDiagnoses,ShkakuVdekjes,DataVdekjes
+Id,PacientId,StafiPergjegjesId,LidhjaFamiljare,Datelindja,Semundja,MoshaDiagnozes,ShkakuVdekjes,DataVdekjes
 1,32,7,Baba,2/14/2014,Diabet,22,Infarkt,9/26/2021
 2,31,5,Nene,8/25/2016,Hipertension,71,Kancer,3/22/2022
 3,22,1,Vella,4/17/2022,Kancer,33,Pleqeri,3/23/2022

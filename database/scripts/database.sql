@@ -94,6 +94,7 @@ CREATE TABLE Person (
 );
 
 CREATE INDEX EmriPlotePersonit ON Person (Emri, Mbiemri);
+CREATE INDEX GjiniPersoni ON Person (GjiniaId);
 
 GO
 
@@ -278,6 +279,16 @@ CREATE TABLE AnamnezaFiziologjike (
     SistemiOrl VARCHAR(MAX) NULL,
     SistemiPsikiatrik VARCHAR(MAX) NULL,
     SistemiKardiovaskular VARCHAR(MAX) NULL,
+
+	CONSTRAINT PlotesimiMinimalSistemeve CHECK (
+		SistemiFrymemarrjes IS NOT NULL OR
+		SistemiGjenitourinar IS NOT NULL OR
+		SistemiTretes IS NOT NULL OR
+		SistemiOkular IS NOT NULL OR
+		SistemiNeurologjik IS NOT NULL OR
+		SistemiOrl IS NOT NULL OR
+		SistemiPsikiatrik IS NOT NULL OR
+		SistemiKardiovaskular IS NOT NULL)
 );
 
 CREATE INDEX AnamnezaFiziologjike_Pacient ON AnamnezaFiziologjike (PacientId);

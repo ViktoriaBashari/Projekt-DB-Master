@@ -12,12 +12,12 @@ public class StaffController : BaseController
     public StaffController(IConfiguration configuration) : base(configuration) { }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int page = 0, int size = 10)
     {
         var connectionString = _configuration.GetConnectionString(_dbConnectionStringName);
         using var connection = new SqlConnection(connectionString);
 
-        var staff = await connection.QueryAsync<StaffSummary>(
+        var result = await connection.QueryMultipleAsync(
             """
             EXECUTE AS USER = @Username;
             
@@ -25,11 +25,26 @@ public class StaffController : BaseController
                 Id, Emri, Mbiemri,
                 PunonjesId, DataPunesimit, Specialiteti,
                 RolEmertimi AS Roli, DepartamentEmri
-            FROM InformacionDetajuarStafi;
+            FROM InformacionDetajuarStafi
+            ORDER BY Id
+            OFFSET @Offset ROWS FETCH NEXT @Limit ROWS ONLY;
+
+            SELECT 
+            CASE WHEN EXISTS(
+            	SELECT 1 
+            	FROM InformacionDetajuarStafi
+            	ORDER BY Id
+            	OFFSET (@Offset + @Limit) ROWS)
+            THEN 1 
+            ELSE 0 END
+            AS EkzistonFaqeTjeter;
 
             REVERT;
             """,
-            new { Username = GetLoggedInUsername() });
+            new { Username = GetLoggedInUsername(), Offset = page * size, Limit = size });
+
+        var staff = await result.ReadAsync<StaffSummary>();
+        ViewBag.HasNextPage = (await result.ReadSingleAsync<int>()) == 1;
 
         return View(staff.ToList());
     }
@@ -55,7 +70,7 @@ public class StaffController : BaseController
             """
             EXECUTE AS USER = @Username;
             
-            SELECT StafId, TurnId, EmriTurnit, OraFilluese, OraPerfundimtare, DitaId, Dita 
+            SELECT TurnId, EmriTurnit, OraFilluese, OraPerfundimtare, DitaId
             FROM OrariPloteStafit 
             WHERE StafId = @PersonId;
             

@@ -1,4 +1,4 @@
-Id,PacientId,StafiPergjegjesId,Semundja,DataDiagnoses,EshteKronike
+Id,PacientId,StafiPergjegjesId,Semundja,DataDiagnozes,EshteKronike
 1,29,1,Diabet,7/31/2007,1
 2,32,20,Hipertension,5/12/2000,0
 3,33,1,Covid,11/10/2018,0

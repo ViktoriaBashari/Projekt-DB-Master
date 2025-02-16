@@ -124,7 +124,7 @@ GRANT SELECT ON dbo.KalkuloTarifenMesatareMujoreTeTrajtimit TO Administrator;
 -- Procedura
 
 GRANT EXECUTE ON dbo.GjeneroFluksinRegjistrimeveTePacienteve TO Administrator;
-GRANT EXECUTE ON dbo.GjeneroProceduratMeTePerdorura TO Administrator;
+GRANT EXECUTE ON dbo.GjeneroSherbimetMeTePerdorura TO Administrator;
 GRANT EXECUTE ON dbo.GjeneroStafinMeTePerdorur TO Administrator;
 GRANT EXECUTE ON dbo.GjeneroPacientetMeTeShpeshte TO Recepsionist;
 

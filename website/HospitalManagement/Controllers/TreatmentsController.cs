@@ -10,18 +10,36 @@ public class TreatmentsController : BaseController
 {
     public TreatmentsController(IConfiguration configuration) : base(configuration) { }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int page = 0, int size = 10)
     {
         var connectionString = _configuration.GetConnectionString(_dbConnectionStringName);
         using var connection = new SqlConnection(connectionString);
 
-        var treatments = await connection.QueryAsync<Treatment>(
+        var result = await connection.QueryMultipleAsync(
             """
             EXECUTE AS USER = @Username;
-            SELECT * FROM Sherbim;
+            
+            SELECT * 
+            FROM Sherbim
+            ORDER BY Kodi
+            OFFSET @Offset ROWS FETCH NEXT @Limit ROWS ONLY;
+            
+            SELECT 
+            CASE WHEN EXISTS(
+            	SELECT 1 
+            	FROM Sherbim
+            	ORDER BY Kodi
+            	OFFSET (@Offset + @Limit) ROWS)
+            THEN 1 
+            ELSE 0 END
+            AS EkzistonFaqeTjeter;
+            
             REVERT;
             """,
-            new { Username = GetLoggedInUsername() });
+            new { Username = GetLoggedInUsername(), Offset = page * size, Limit = size });
+
+        var treatments = await result.ReadAsync<Treatment>();
+        ViewBag.HasNextPage = (await result.ReadSingleAsync<int>()) == 1;
 
         return View(treatments.ToList());
     }

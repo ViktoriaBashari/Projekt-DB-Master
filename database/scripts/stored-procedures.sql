@@ -25,7 +25,7 @@ END;
 
 GO
 
-CREATE OR ALTER PROCEDURE GjeneroProceduratMeTePerdorura
+CREATE OR ALTER PROCEDURE GjeneroSherbimetMeTePerdorura
 (
 	@DistributimMujor BIT, -- Shto ndarje mujore ne raport
 	@VitiPerkates INT = NULL
@@ -34,7 +34,7 @@ AS BEGIN
 	SET NOCOUNT ON;
 
 	SELECT 
-		TOP 10
+		TOP 15
 		DATEPART(YEAR, Takim.DataTakimit) AS Viti,
 		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, Takim.DataTakimit) END AS Muaji,
 		sherb.Kodi, sherb.Emri, 
@@ -49,33 +49,30 @@ AS BEGIN
 		sherb.Emri,
 		DATEPART(YEAR, Takim.DataTakimit),
 		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, Takim.DataTakimit) END
-	ORDER BY COUNT(Takim.Id);
+	ORDER BY COUNT(Takim.Id) DESC;
 END;
 
 GO
 
 CREATE OR ALTER PROCEDURE GjeneroStafinMeTePerdorur
 (
-	@DistributimMujor BIT, -- Shto ndarje mujore ne raport
 	@RolId INT,
 	@VitiPerkates INT = NULL
 )
 AS BEGIN 
 	SET NOCOUNT ON;
 	SELECT 
-		TOP 10
+		TOP 15
 		person.Id, person.Emri, person.Mbiemri, COUNT(takim.Id) AS NrTakimeve
-	FROM Takim as takim
-	INNER JOIN Staf AS staf ON staf.PersonId = takim.DoktorId OR staf.PersonId = takim.InfermierId
-	INNER JOIN Person AS person ON person.Id = staf.PersonId
+	FROM Takim
+	INNER JOIN Staf ON Staf.PersonId = Takim.DoktorId OR Staf.PersonId = Takim.InfermierId
+	INNER JOIN Person ON Person.Id = Staf.PersonId
 	WHERE 
 		takim.EshteAnulluar = 0 AND 
 		(@VitiPerkates IS NULL OR DATEPART(YEAR, takim.DataTakimit) = @VitiPerkates) AND
 		staf.RolId = @RolId
-	GROUP BY 
-		person.Id, person.Emri, person.Mbiemri,
-		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, takim.DataTakimit) END
-	ORDER BY COUNT(takim.Id);
+	GROUP BY person.Id, person.Emri, person.Mbiemri
+	ORDER BY COUNT(takim.Id) DESC;
 END;
 
 GO
@@ -83,12 +80,12 @@ GO
 CREATE OR ALTER PROCEDURE GjeneroPacientetMeTeShpeshte
 (
 	@VitiPerkates INT,
-	@MuajiPerkates INT = NULL -- Shto ndarje mujore ne raport
+	@MuajiPerkates INT = NULL
 )
 AS BEGIN
 	SET NOCOUNT ON;
 	SELECT 
-		TOP 10
+		TOP 15
 		person.Id, person.Emri, person.Mbiemri, COUNT(takim.Id) AS NrTakimeve
 	FROM Pacient AS pacient
 	INNER JOIN Person AS person ON pacient.PersonId = person.Id
@@ -98,7 +95,7 @@ AS BEGIN
 		DATEPART(YEAR, takim.DataTakimit) = @VitiPerkates AND
 		(@MuajiPerkates IS NULL OR DATEPART(MONTH, takim.DataTakimit) = @MuajiPerkates)
 	GROUP BY person.Id, person.Emri, person.Mbiemri
-	ORDER BY COUNT(takim.Id);
+	ORDER BY COUNT(takim.Id) DESC;
 END;
 
 GO

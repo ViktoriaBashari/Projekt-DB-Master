@@ -7,4 +7,4 @@
 :r $(path)\roles.sql
 :r $(path)\rls-functions.sql
 :r $(path)\tables-population.sql
-:r $(path)\users.sql
+:r $(path)\dummy-users.sql

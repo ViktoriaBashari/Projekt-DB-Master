@@ -24,7 +24,11 @@ END;
 
 GO
 
-CREATE TYPE UpsertedTakimType AS TABLE(DoktorId INT NOT NULL, InfermierId INT NULL, DataTakimit DATETIME);
+IF NOT EXISTS(
+	SELECT 1 
+	FROM sys.types 
+	WHERE is_table_type = 1 AND name = 'UpsertedTakimType')
+	CREATE TYPE UpsertedTakimType AS TABLE(DoktorId INT NOT NULL, InfermierId INT NULL, DataTakimit DATETIME);
 GO
 
 CREATE OR ALTER FUNCTION JaneTakimetBrendaOrarit(@Takimet UpsertedTakimType READONLY) 
@@ -168,7 +172,7 @@ AS BEGIN
 		RETURN CAST('Data fillimtare duhet te jete me e vogel se ajo perfundimtare' AS INT);
 	
 	DECLARE @takimet TABLE (Id INT, EshteAnulluar BIT);
-	DECLARE @nrTotalTakimeve INT, @nrTakimeveAnulluara INT;
+	DECLARE @nrTotalTakimeve DECIMAL(20,3), @nrTakimeveAnulluara DECIMAL(20,3);
 
 	INSERT @takimet
 	SELECT Id, EshteAnulluar
@@ -228,7 +232,8 @@ AS RETURN
 		(@VitiPerfundimtar IS NULL OR DATEPART(YEAR, DataPagimit) <= @VitiPerfundimtar)
 	GROUP BY 
 		DATEPART(YEAR, DataPagimit),
-		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, DataPagimit) END;
+		CASE WHEN @DistributimMujor = 1 THEN DATEPART(MONTH, DataPagimit) 
+END;
 
 GO
 
@@ -280,32 +285,19 @@ CREATE OR ALTER FUNCTION KalkuloTarifenMesatareMujoreTeTrajtimit
 	@VitiFillimtar INT = NULL,
 	@VitiPerfundimtar INT = NULL
 )
-RETURNS @rezultati TABLE(Viti INT, Muaji INT, TarifaMesatareTrajtimit DECIMAL)
-AS BEGIN
-	DECLARE @tabelaAgregatesMujoreTeTakimeve TABLE(Viti INT, Muaji INT, NrTakimeve INT);
-	DECLARE @tabelaFitimeveMujoreNgaSherbimet TABLE(Viti INT, Muaji INT, FitimeFature DECIMAL);
-
-	INSERT INTO @tabelaAgregatesMujoreTeTakimeve
-	SELECT
+RETURNS TABLE
+AS RETURN
+	SELECT 
 		DATEPART(YEAR, DataTakimit) AS Viti, 
 		DATEPART(MONTH, DataTakimit) AS Muaji,
-		COUNT(Id) AS NrTakimeve
+		IIF(COUNT(Takim.Id) = 0, 0, SUM(Fature.Cmimi) / COUNT(Takim.Id)) AS TarifaMesatareTrajtimit
 	FROM Takim
-	WHERE EshteAnulluar = 0 AND DataTakimit < GETDATE()
+	INNER JOIN Fature ON Fature.TakimId = Takim.Id
+	WHERE
+		Takim.EshteAnulluar = 0 and 
+		(@VitiFillimtar IS NULL OR DATEPART(YEAR, DataTakimit) >= @VitiFillimtar) AND
+		(@VitiPerfundimtar IS NULL OR DATEPART(YEAR, DataTakimit) <= @VitiPerfundimtar)
 	GROUP BY DATEPART(YEAR, DataTakimit), DATEPART(MONTH, DataTakimit);
-
-	INSERT INTO @tabelaFitimeveMujoreNgaSherbimet 
-	SELECT * FROM GjeneroRaportFitimesh(@VitiFillimtar, @VitiPerfundimtar, 1);
-
-	INSERT INTO @rezultati 
-	SELECT 
-		nrTakimeve.Viti, nrTakimeve.Muaji, 
-		IIF(NrTakimeve = 0, 0, FitimeFature / NrTakimeve) AS TarifaMesatareTrajtimit
-	FROM @tabelaAgregatesMujoreTeTakimeve AS nrTakimeve
-	INNER JOIN @tabelaFitimeveMujoreNgaSherbimet AS fitimet ON nrTakimeve.Viti = fitimet.Viti AND nrTakimeve.Muaji = fitimet.Muaji;
-
-	RETURN;
-END;
 
 GO
 

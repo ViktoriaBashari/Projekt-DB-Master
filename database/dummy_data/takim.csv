@@ -1,5 +1,5 @@
 ﻿Id,DataKrijimit,DataTakimit,DoktorId,InfermierId,PacientId,SherbimId,ShqetesimiKryesor,KohezgjatjaShqetesimit,SimptomaTeLidhura,Konkluzioni,EshteAnulluar
-1,1/1/2023 7:00:00,1/1/2023 7:30:00,1,20,21,SH006,Dhimbje koke,1 jave,Asnje ,Ne rregull,0
+1,1/1/2023 7:00:00,1/1/2023 7:30:00,8,20,21,SH006,Dhimbje koke,1 jave,Asnje ,Ne rregull,0
 2,5/22/2023 14:34:00,5/24/2023 15:00:00,7,13,22,SH002,Lodhje,2 muaj,Asnje,Ne rregull,0
 3,7/6/2023 17:45:00,7/6/2023 18:00:00,3,19,23,SH001,Temperature,5 dite,Asnje,Ne rregull,0
 4,2/4/2023 20:13:00,2/6/2023 8:50:00,2,4,24,SH005,Hipertension,2 jave,Dhimbje koke,Ne rregull,1

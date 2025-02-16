@@ -176,11 +176,38 @@ FOR UPDATE
 AS BEGIN
 	IF IS_ROLEMEMBER('Receptionist', CURRENT_USER) = 1
 		BEGIN
-			IF EXISTS(SELECT 1 FROM DELETED WHERE DataTakimit < GETDATE())
+			-- Mos lejo perditesimin e takimeve pas kalimit te nje dite nga orari perkates
+			IF EXISTS(
+				SELECT 1 FROM DELETED WHERE DataTakimit < GETDATE())
 				BEGIN
-					RAISERROR('Nuk lejohet perditesimi i takimit pas ores se takimit', 16, -1);
+					RAISERROR('Nuk lejohet perditesimi i takimit pas dites se takimit', 16, -1);
 					ROLLBACK TRANSACTION;
 				END
+
+			-- Mos lejo perditesimin e takimeve te kryera
+			IF EXISTS(
+					SELECT 1 
+					FROM DELETED 
+					WHERE 
+						ShqetesimiKryesor IS NOT NULL OR
+						KohezgjatjaShqetesimit IS NOT NULL OR
+						SimptomaTeLidhura IS NOT NULL OR
+						Konkluzioni IS NOT NULL)
+				BEGIN
+					RAISERROR('Nuk lejohet perditesimi i takimit pas kryerjes se saj', 16, -1);
+					ROLLBACK TRANSACTION;
+				END
+
+			-- Mos lejo perditesimin e orarit per takimet e anulluara
+			IF UPDATE(DataTakimit) AND 
+				(
+					EXISTS(SELECT 1 FROM INSERTED WHERE EshteAnulluar = 1) OR
+					EXISTS(SELECT 1 FROM DELETED WHERE EshteAnulluar = 1)
+				)
+			BEGIN
+				RAISERROR('Nuk lejohet perditesimi i orarit per takime te anulluara', 16, -1);
+				ROLLBACK TRANSACTION;
+			END
 
 			IF UPDATE(DataTakimit)
 				BEGIN
